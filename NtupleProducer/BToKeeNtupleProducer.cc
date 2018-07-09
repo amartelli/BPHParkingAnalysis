@@ -9,19 +9,27 @@
 
 
 #include <iostream>
+#include <fstream>
 #include "TFile.h"
 #include "TTree.h"
 #include "TChain.h"
 #include "TString.h"
 #include "TLorentzVector.h"
-
+#include "TString.h"
 #include "NanoAODTree.h"
+
+
 
 
 float JPsiMass_ = 3.0969;
 float BuMass_ = 5.279;
 float KaonMass_ = 0.493677;
 float ElectronMass_ = 0.5109989e-3;
+
+float min_CL = 0.1;
+float min_BcosAlpha = 0.9;
+float min_KDCA = 6;
+float min_BIP = 1;
 
 
 int main(int argc, char** argv) {
@@ -39,6 +47,16 @@ int main(int argc, char** argv) {
       break;
     }
   }
+
+
+  bool isResonant = false;
+  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "Resonant") {
+      isResonant = true;
+      break;
+    }
+  }
+
 
   string output;
   for (int i = 1; i < argc; ++i) {
@@ -60,6 +78,8 @@ int main(int argc, char** argv) {
   
 
   string input;
+  string listFilesTXT;
+  bool inputTXT = false;
   for (int i = 1; i < argc; ++i) {
     if(std::string(argv[i]) == "--input") {
       if (i + 1 < argc) {
@@ -68,13 +88,25 @@ int main(int argc, char** argv) {
       } else {
 	std::cerr << "--intput option requires one argument." << std::endl;
 	return 1;
-      }      
-    }  
+      }
+    } 
+    else if(std::string(argv[i]) == "--inputTXT") {
+      if (i + 1 < argc) {
+	inputTXT = true;
+	listFilesTXT = argv[i+1];
+	break;
+      } else {
+	std::cerr << "--intputTXT option requires one argument." << std::endl;
+	return 1;
+      } 
+    }      
   }
-  if(input==""){
+
+  if(listFilesTXT == "" && input == ""){
     std::cerr << "--input argument required" << std::endl;
     return 1;
   }
+  
 
 
   bool overwrite;
@@ -105,7 +137,18 @@ int main(int argc, char** argv) {
 
 
   TChain* oldtree = new TChain("Events");
-  oldtree->Add(input.c_str());
+  if(inputTXT){
+    string reader;
+    std::ifstream inFileLong;
+    inFileLong.open(listFilesTXT.c_str(), std::ios::in);
+
+    while(!inFileLong.eof()){
+      inFileLong >> reader;
+      std::cout << " Adding " << reader << std::endl;
+      oldtree->Add(reader.c_str());
+    }
+  }
+  else   oldtree->Add(input.c_str());
   NanoAODTree* tree = new NanoAODTree(oldtree);
 
   TTree* tree_new=new TTree("BToKeeTree","BToKeeTree");
@@ -252,8 +295,9 @@ int main(int argc, char** argv) {
       }
 
     }
-
-    if(_Muon_sel_index <0){
+  
+    //when MC with trigger is available re-enable for everything
+    if(_Muon_sel_index <0 && isBPHParking == true){
       //Let's skim events which do not have a tag muon (including trigger)
       //tree_new->Fill();
       continue;
@@ -267,30 +311,58 @@ int main(int argc, char** argv) {
 
     for(int i_BToKee=0; i_BToKee<nBToKee; i_BToKee++){            
 
-      if(tree->BToKee_kaon_charge[i_BToKee]*tree->Muon_charge[_Muon_sel_index]>0) continue; //Only consider BToKee with opposite charge to muon
-      
+      //check for dataset with trigger info
+      if(isBPHParking == true && tree->BToKee_kaon_charge[i_BToKee]*tree->Muon_charge[_Muon_sel_index]>0) continue; //Only consider BToKee with opposite charge to muon
+
+      //can be too restrictive for the moment
+      /*
+      if(BToKee_ele1_charge[i_BToKee] != Electron_charge[BToKee_ele1_charge[i_BToKee]] || 
+	 BToKee_ele1_charge[i_BToKee] == -1 || BToKee_ele1_charge[i_BToKee] > nElectron) continue;
+      if(BToKee_ele2_charge[i_BToKee] != Electron_charge[BToKee_ele2_charge[i_BToKee]] || 
+	 BToKee_ele2_charge[i_BToKee] == -1 || BToKee_ele2_charge[i_BToKee] > nElectron) continue;
+      */
+
+      //should study effect of charge flip...
+      if(tree->BToKee_ele1_charge[i_BToKee] * tree->BToKee_ele2_charge[i_BToKee] > 0.) continue;
+
+
       float ee_mass = tree->BToKee_ee_mass[i_BToKee];
       float ee_CL_vtx = tree->BToKee_ee_CL_vtx[i_BToKee];
-	
-      //JPsi selection
-      if( !(best_JPsi_mass < 0. 
-	    || abs(best_JPsi_mass-ee_mass)<1e-3 //Several BToKee can share the same JPsi->ee
-	    || abs(ee_mass-JPsiMass_) < abs(best_JPsi_mass-JPsiMass_)) )       
-	continue;
 
-      //if( ee_CL_vtx < min_CL) continue; //cut on ee vtx refitting
+
+      //do not want to bias the ee choice, remove this
+      /*
+	//JPsi selection
+	if( !(best_JPsi_mass < 0. 
+	      || abs(best_JPsi_mass-ee_mass)<1e-3 //Several BToKee can share the same JPsi->ee
+	      || abs(ee_mass-JPsiMass_) < abs(best_JPsi_mass-JPsiMass_)) )       
+	  continue;
+	
+	//if( ee_CL_vtx < min_CL) continue; //cut on ee vtx refitting
+	*/
 
       float B_mass = tree->BToKee_mass[i_BToKee];
       float B_CL_vtx = tree->BToKee_CL_vtx[i_BToKee];
       
+      float BcosAlpha = tree->BToKee_cosAlpha[i_BToKee];
+      float B_K_DCAsig = tree->BToKee_kaon_DCASig[i_BToKee];
+      float B_VtxIP = tree->BToKee_Lxy[i_BToKee];
+
       if( !(best_Bu_mass < 0. 
 	    || abs(B_mass-BuMass_) < abs(best_Bu_mass-BuMass_)) )       
 	continue;
-      
+
+      //can check all of this at next stage on ntuples
+      /*
+      if( B_CL_vtx < min_CL) continue; //cut on vtx refitting
+      if(BcosAlpha < min_BcosAlpha) continue;
+      if(B_K_DCAsig < min_KDCA) continue;
+      if(B_VtxIP < min_BIP) continue;
+      */
       best_JPsi_mass = ee_mass;
       best_Bu_mass = B_mass;
       _BToKee_sel_index = i_BToKee;
-
+	
     }
 
 
@@ -300,7 +372,8 @@ int main(int argc, char** argv) {
     if(isMC){
       
       int nGenPart = tree->nGenPart;
-      
+
+      if(isResonant){      
       for(int i_Bu=0; i_Bu<nGenPart; i_Bu++){
 
 	if(abs(tree->GenPart_pdgId[i_Bu])==521){
@@ -324,8 +397,7 @@ int main(int argc, char** argv) {
 
       }
 
-
-      
+     
       for(int i_gen=0; i_gen<nGenPart; i_gen++){
 
 	int pdgId = tree->GenPart_pdgId[i_gen];
@@ -337,6 +409,71 @@ int main(int argc, char** argv) {
 	if(_GenPart_e1FromJPsi_index>=0 && _GenPart_e2FromJPsi_index>=0) break;
 
       }
+      }
+      else{
+	for(int i_Bu=0; i_Bu<nGenPart; i_Bu++){
+
+	  if(abs(tree->GenPart_pdgId[i_Bu])==521){
+
+	    for(int i_gen=0; i_gen<nGenPart; i_gen++){
+	      int pdgId = tree->GenPart_pdgId[i_gen];
+	      int mother_index = tree->GenPart_genPartIdxMother[i_gen];
+	      if(abs(pdgId)==11 && mother_index == i_Bu && _GenPart_e1FromJPsi_index<0)
+		_GenPart_e1FromJPsi_index = i_gen;
+	      else if(abs(pdgId)==11 && mother_index == i_Bu)
+		_GenPart_e2FromJPsi_index = i_gen;
+	      else if(abs(pdgId)==321 && mother_index == i_Bu)
+		_GenPart_KFromB_index = i_gen;
+	      if(_GenPart_e1FromJPsi_index>=0 && _GenPart_e2FromJPsi_index>=0 && _GenPart_KFromB_index>=0){
+		_GenPart_BToKee_index = i_Bu;
+		break;
+	      }
+	     }	  
+	  }//if B
+	  
+	  if(_GenPart_BToKee_index>=0) break;
+	  
+	}//loop over B
+
+
+	/*
+	for(int i_Bu=0; i_Bu<nGenPart; i_Bu++){
+
+	  if(abs(tree->GenPart_pdgId[i_Bu])==521){
+	    for(int i_gen=0; i_gen<nGenPart; i_gen++){
+	      int pdgId = tree->GenPart_pdgId[i_gen];
+	      int mother_index = tree->GenPart_genPartIdxMother[i_gen];
+	      if(abs(pdgId)==22 && mother_index == i_Bu)
+		_GenPart_JPsiFromB_index = i_gen;
+	      else if(abs(pdgId)==321 && mother_index == i_Bu)
+		_GenPart_KFromB_index = i_gen;
+	      if(_GenPart_JPsiFromB_index>=0 && _GenPart_KFromB_index>=0){
+		_GenPart_BToKee_index = i_Bu;
+		break;
+	      }
+	    }	  	    
+	  }	
+	  if(_GenPart_BToKee_index>=0) break;	  
+	}
+
+     
+	for(int i_gen=0; i_gen<nGenPart; i_gen++){
+	  int pdgId = tree->GenPart_pdgId[i_gen];
+	  int mother_index = tree->GenPart_genPartIdxMother[i_gen];
+	  if(abs(pdgId)==11 && mother_index == _GenPart_JPsiFromB_index && _GenPart_e1FromJPsi_index<0)
+	    _GenPart_e1FromJPsi_index = i_gen;
+	  else if(abs(pdgId)==11 && mother_index == _GenPart_JPsiFromB_index)
+	    _GenPart_e2FromJPsi_index = i_gen;
+	  if(_GenPart_e1FromJPsi_index>=0 && _GenPart_e2FromJPsi_index>=0) break;
+	}
+	*/
+	//	if(_GenPart_BToKee_index<0) std::cout << " B not found " << " _GenPart_e1FromJPsi_index = " << _GenPart_e1FromJPsi_index
+	//<< " _GenPart_e2FromJPsi_index = " << _GenPart_e2FromJPsi_index 
+	//				      << " _GenPart_KFromB_index = " << _GenPart_KFromB_index << std::endl;
+
+	if(_GenPart_BToKee_index>0) std::cout << " B found " << std::endl;
+      }
+
 
       //e1FromJPsi stored a leading daughter
       if(tree->GenPart_pt[_GenPart_e2FromJPsi_index]>tree->GenPart_pt[_GenPart_e1FromJPsi_index]){

@@ -1,0 +1,9 @@
+sh Make.sh BToKeeNtupleProducer.cc
+./BToKeeNtupleProducer.exe mc --input test94X_NANO.root --output test.root
+
+
+
+1) option to read several input .root 
+./BToKeeNtupleProducer.exe mc --inputTXT  filelist_with_inputROOT  --output test.root
+
+2) add string "Resonant" if dealing with the resonant channel => change only in the gen-matching 
