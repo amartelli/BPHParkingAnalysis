@@ -392,14 +392,10 @@ int main(int argc, char** argv) {
 	  }	  
 
 	}
-	
 	if(_GenPart_BToKee_index>=0) break;
-
       }
 
-     
       for(int i_gen=0; i_gen<nGenPart; i_gen++){
-
 	int pdgId = tree->GenPart_pdgId[i_gen];
 	int mother_index = tree->GenPart_genPartIdxMother[i_gen];
 	if(abs(pdgId)==11 && mother_index == _GenPart_JPsiFromB_index && _GenPart_e1FromJPsi_index<0)
@@ -409,7 +405,7 @@ int main(int argc, char** argv) {
 	if(_GenPart_e1FromJPsi_index>=0 && _GenPart_e2FromJPsi_index>=0) break;
 
       }
-      }
+      }//resonant
       else{
 	for(int i_Bu=0; i_Bu<nGenPart; i_Bu++){
 
@@ -430,48 +426,8 @@ int main(int argc, char** argv) {
 	      }
 	     }	  
 	  }//if B
-	  
 	  if(_GenPart_BToKee_index>=0) break;
-	  
 	}//loop over B
-
-
-	/*
-	for(int i_Bu=0; i_Bu<nGenPart; i_Bu++){
-
-	  if(abs(tree->GenPart_pdgId[i_Bu])==521){
-	    for(int i_gen=0; i_gen<nGenPart; i_gen++){
-	      int pdgId = tree->GenPart_pdgId[i_gen];
-	      int mother_index = tree->GenPart_genPartIdxMother[i_gen];
-	      if(abs(pdgId)==22 && mother_index == i_Bu)
-		_GenPart_JPsiFromB_index = i_gen;
-	      else if(abs(pdgId)==321 && mother_index == i_Bu)
-		_GenPart_KFromB_index = i_gen;
-	      if(_GenPart_JPsiFromB_index>=0 && _GenPart_KFromB_index>=0){
-		_GenPart_BToKee_index = i_Bu;
-		break;
-	      }
-	    }	  	    
-	  }	
-	  if(_GenPart_BToKee_index>=0) break;	  
-	}
-
-     
-	for(int i_gen=0; i_gen<nGenPart; i_gen++){
-	  int pdgId = tree->GenPart_pdgId[i_gen];
-	  int mother_index = tree->GenPart_genPartIdxMother[i_gen];
-	  if(abs(pdgId)==11 && mother_index == _GenPart_JPsiFromB_index && _GenPart_e1FromJPsi_index<0)
-	    _GenPart_e1FromJPsi_index = i_gen;
-	  else if(abs(pdgId)==11 && mother_index == _GenPart_JPsiFromB_index)
-	    _GenPart_e2FromJPsi_index = i_gen;
-	  if(_GenPart_e1FromJPsi_index>=0 && _GenPart_e2FromJPsi_index>=0) break;
-	}
-	*/
-	//	if(_GenPart_BToKee_index<0) std::cout << " B not found " << " _GenPart_e1FromJPsi_index = " << _GenPart_e1FromJPsi_index
-	//<< " _GenPart_e2FromJPsi_index = " << _GenPart_e2FromJPsi_index 
-	//				      << " _GenPart_KFromB_index = " << _GenPart_KFromB_index << std::endl;
-
-	if(_GenPart_BToKee_index>0) std::cout << " B found " << std::endl;
       }
 
 
