@@ -89,6 +89,8 @@ public :
    float BToKmumu_mu2_phi[kBToKmumuMax];
 
    uint nBToKee;
+   float BToKee_Lxy[kBToKeeMax];
+   float BToKee_cosAlpha[kBToKeeMax];
    float BToKee_CL_vtx[kBToKeeMax];
    float BToKee_ee_CL_vtx[kBToKeeMax];
    float BToKee_ee_mass[kBToKeeMax];
@@ -97,9 +99,12 @@ public :
    float BToKee_kaon_pt[kBToKeeMax];
    float BToKee_kaon_eta[kBToKeeMax];
    float BToKee_kaon_phi[kBToKeeMax];
+   float BToKee_kaon_DCASig[kBToKeeMax];
+   float BToKee_ele1_charge[kBToKeeMax];
    float BToKee_ele1_pt[kBToKeeMax];
    float BToKee_ele1_eta[kBToKeeMax];
    float BToKee_ele1_phi[kBToKeeMax];
+   float BToKee_ele2_charge[kBToKeeMax];
    float BToKee_ele2_pt[kBToKeeMax];
    float BToKee_ele2_eta[kBToKeeMax];
    float BToKee_ele2_phi[kBToKeeMax];
@@ -243,6 +248,8 @@ void NanoAODTree::Init(TChain* tree)
 
   int BToKee_info = _tree->SetBranchAddress("nBToKee",&nBToKee);
   if(BToKee_info>=0){
+    _tree->SetBranchAddress("BToKee_cosAlpha",&BToKee_cosAlpha);
+    _tree->SetBranchAddress("BToKee_Lxy",&BToKee_Lxy);
     _tree->SetBranchAddress("BToKee_CL_vtx",&BToKee_CL_vtx);
     _tree->SetBranchAddress("BToKee_ee_CL_vtx",&BToKee_ee_CL_vtx);
     _tree->SetBranchAddress("BToKee_ee_mass",&BToKee_ee_mass);
@@ -251,9 +258,12 @@ void NanoAODTree::Init(TChain* tree)
     _tree->SetBranchAddress("BToKee_kaon_pt",&BToKee_kaon_pt);
     _tree->SetBranchAddress("BToKee_kaon_eta",&BToKee_kaon_eta);
     _tree->SetBranchAddress("BToKee_kaon_phi",&BToKee_kaon_phi);
+    _tree->SetBranchAddress("BToKee_kaon_DCASig",&BToKee_kaon_DCASig);
+    _tree->SetBranchAddress("BToKee_ele1_charge",&BToKee_ele1_charge);
     _tree->SetBranchAddress("BToKee_ele1_pt",&BToKee_ele1_pt);
     _tree->SetBranchAddress("BToKee_ele1_eta",&BToKee_ele1_eta);
     _tree->SetBranchAddress("BToKee_ele1_phi",&BToKee_ele1_phi);
+    _tree->SetBranchAddress("BToKee_ele2_charge",&BToKee_ele2_charge);
     _tree->SetBranchAddress("BToKee_ele2_pt",&BToKee_ele2_pt);
     _tree->SetBranchAddress("BToKee_ele2_eta",&BToKee_ele2_eta);
     _tree->SetBranchAddress("BToKee_ele2_phi",&BToKee_ele2_phi);
