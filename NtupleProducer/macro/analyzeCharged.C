@@ -33,8 +33,8 @@ void analyzeCharged(){
   TChain* t1 = new TChain("Events");
   TChain* t2 = new TChain("Events");
 
-  t1->Add("/vols/cms/amartell/BParking/ntuPROD/ntu_BToKJPsiee_v18_06_4.root");
-  t2->Add("/vols/cms/amartell/BParking/ntuPROD/ntu_BToKJPsiee.root");
+  t1->Add("/vols/cms/amartell/BParking/ntuPROD/ntu_BToKee_v18_03_22_and_21.root");
+  t2->Add("/vols/cms/amartell/BParking/ntuPROD/ntu_BToKJPsiee_v18_06_4.root");
 
 
   int nNNR = t1->GetEntries();
