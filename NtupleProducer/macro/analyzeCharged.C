@@ -33,7 +33,7 @@ void analyzeCharged(){
   TChain* t1 = new TChain("Events");
   TChain* t2 = new TChain("Events");
 
-  t1->Add("/vols/cms/amartell/BParking/ntuPROD/ntu_BToKee_v18_03_22.root");
+  t1->Add("/vols/cms/amartell/BParking/ntuPROD/ntu_BToKJPsiee_v18_06_4.root");
   t2->Add("/vols/cms/amartell/BParking/ntuPROD/ntu_BToKJPsiee.root");
 
 
@@ -302,8 +302,13 @@ void analyzeCharged(){
   /////////////////compute acceptance in q bins
 
 
+  //recompute ee mass
+
+
   TH1F* JPsiMass_bin = new TH1F("JPsiMass_bin", "", 1000, 0., 10.);
   TH1F* hMass_bins[5];
+  TH1F* JPsiMass_bin_cut0 = new TH1F("JPsiMass_bin_cut0", "", 1000, 0., 10.);
+  TH1F* hMass_bins_cut0[5];
   std::vector<std::string> eeMassRange;
   std::vector<float> eeMassBoundary;
   eeMassBoundary.push_back(0.);
@@ -314,33 +319,44 @@ void analyzeCharged(){
   eeMassBoundary.push_back(3.58);
 
   float eventCounts[5];
+  float eventCounts_cut0[5];
 
   for(int ij=0; ij<5; ++ij){
     hMass_bins[ij] = new TH1F(Form("hMass_eeRange_%.2f-%.2f",eeMassBoundary.at(ij), eeMassBoundary.at(ij+1)), "", 1000, 0., 10.);
-    std::string cut = Form("&& BToKee_ee_mass[BToKee_gen_index] > %.2f && BToKee_ee_mass[BToKee_gen_index] < %.2f", 
+    hMass_bins_cut0[ij] = new TH1F(Form("hMass_eeRange_cut0_%.2f-%.2f",eeMassBoundary.at(ij), eeMassBoundary.at(ij+1)), "", 1000, 0., 10.);
+    std::string cut = Form("&& BToKee_eeKFit_ee_mass[BToKee_gen_index] > %.2f && BToKee_eeKFit_ee_mass[BToKee_gen_index] < %.2f", 
 			   eeMassBoundary.at(ij), eeMassBoundary.at(ij+1));
     eeMassRange.push_back(cut);
 
-    eventCounts[ij] = t1->Draw(Form("BToKee_ee_mass[BToKee_gen_index] >> %s", hMass_bins[ij]->GetName()), 
+    eventCounts[ij] = t1->Draw(Form("BToKee_eeKFit_ee_mass[BToKee_gen_index] >> %s", hMass_bins[ij]->GetName()), 
 			       (cut_gen_charge+cut_alpha+cut_CL+cut_DCA+eeMassRange.at(ij)).c_str());
 
+    eventCounts_cut0[ij] = t1->Draw(Form("BToKee_eeKFit_ee_mass[BToKee_gen_index] >> %s", hMass_bins_cut0[ij]->GetName()), 
+				    (cut_gen_charge+eeMassRange.at(ij)).c_str());
+
     std::cout << " >>> non-resonant ee mass bin " << eeMassBoundary.at(ij) << "-" << eeMassBoundary.at(ij+1) 
-	      << " nEvents = " << eventCounts[ij] << " in total MC events = " << nNNR << std::endl;
+	      << " nEvents cut0 = " << eventCounts_cut0[ij] << " post selection = " << eventCounts[ij] << " in total MC events = " << nNNR << std::endl;
   }
 
 
-  float resonantEvents = t1->Draw("BToKee_ee_mass[BToKee_gen_index] >> JPsiMass_bin",
+  float resonantEvents = t1->Draw("BToKee_eeKFit_ee_mass[BToKee_gen_index] >> JPsiMass_bin",
 				  (cut_gen_charge+cut_alpha+cut_CL+cut_DCA+eeMassRange.at(3)).c_str());
-
+  float resonantEvents_cut0 = t1->Draw("BToKee_eeKFit_ee_mass[BToKee_gen_index] >> JPsiMass_bin_cut0",
+				       (cut_gen_charge+eeMassRange.at(3)).c_str());
+  
   std::cout << " >>> resonant JPsi mass bin = " << eeMassRange.at(3) 
-	    << " nEvents = " << resonantEvents << " in total MC events = " << nReso << std::endl;
+	    << " nEvents cut0 = "  << resonantEvents_cut0 << " post selection = " << resonantEvents << " in total MC events = " << nReso << std::endl;
 
-
+  
   TFile outMassHistos("outMassHistos.root", "recreate");
   outMassHistos.cd();
   for(int ij=0; ij<5; ++ij){
     hMass_bins[ij]->Write(Form("hMass_eeRange_%.2f-%.2f",eeMassBoundary.at(ij), eeMassBoundary.at(ij+1)));
+    hMass_bins_cut0[ij]->Write(Form("hMass_eeRange_cut0_%.2f-%.2f",eeMassBoundary.at(ij), eeMassBoundary.at(ij+1)));
   }
   JPsiMass_bin->Write();
+  JPsiMass_bin_cut0->Write();
   outMassHistos.Close();
+
+
 }

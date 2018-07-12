@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
 	std::cerr << "--intput option requires one argument." << std::endl;
 	return 1;
       }
-    } 
+    }
     else if(std::string(argv[i]) == "--inputTXT") {
       if (i + 1 < argc) {
 	inputTXT = true;
@@ -98,15 +98,14 @@ int main(int argc, char** argv) {
       } else {
 	std::cerr << "--intputTXT option requires one argument." << std::endl;
 	return 1;
-      } 
-    }      
+      }
+    }
   }
 
   if(listFilesTXT == "" && input == ""){
     std::cerr << "--input argument required" << std::endl;
     return 1;
   }
-  
 
 
   bool overwrite;
@@ -285,7 +284,7 @@ int main(int argc, char** argv) {
 
 	isMuSel &= (_HLT_BPHParking && isTrigMatched);
 
-      }
+      }//is Bparking
 
       //Should implement something to avoid overlap with BToKmm final state (nMuon>1 won't work because only muons with pT>3 GeV are stored in default NanoAOD)
 
@@ -294,15 +293,15 @@ int main(int argc, char** argv) {
 	break; //Take leading muon passing the selections (muons are pt-ordered)
       }
 
-    }
-  
+    }//loop over muons
+
     //when MC with trigger is available re-enable for everything
-    if(_Muon_sel_index <0 && isBPHParking == true){
+    if(_Muon_sel_index <0){
       //Let's skim events which do not have a tag muon (including trigger)
       //tree_new->Fill();
       continue;
     }
-
+  
     //Select the BToKee candidate with reco criteria
 
     int nBToKee = tree->nBToKee;
@@ -312,13 +311,13 @@ int main(int argc, char** argv) {
     for(int i_BToKee=0; i_BToKee<nBToKee; i_BToKee++){            
 
       //check for dataset with trigger info
-      if(isBPHParking == true && tree->BToKee_kaon_charge[i_BToKee]*tree->Muon_charge[_Muon_sel_index]>0) continue; //Only consider BToKee with opposite charge to muon
+      if(tree->BToKee_kaon_charge[i_BToKee]*tree->Muon_charge[_Muon_sel_index]>0) continue; //Only consider BToKee with opposite charge to muon
 
       //can be too restrictive for the moment
       /*
-      if(BToKee_ele1_charge[i_BToKee] != Electron_charge[BToKee_ele1_charge[i_BToKee]] || 
+      if(BToKee_ele1_charge[i_BToKee] != Electron_charge[BToKee_ele1_charge[i_BToKee]] ||
 	 BToKee_ele1_charge[i_BToKee] == -1 || BToKee_ele1_charge[i_BToKee] > nElectron) continue;
-      if(BToKee_ele2_charge[i_BToKee] != Electron_charge[BToKee_ele2_charge[i_BToKee]] || 
+      if(BToKee_ele2_charge[i_BToKee] != Electron_charge[BToKee_ele2_charge[i_BToKee]] ||
 	 BToKee_ele2_charge[i_BToKee] == -1 || BToKee_ele2_charge[i_BToKee] > nElectron) continue;
       */
 
@@ -335,9 +334,9 @@ int main(int argc, char** argv) {
 	//JPsi selection
 	if( !(best_JPsi_mass < 0. 
 	      || abs(best_JPsi_mass-ee_mass)<1e-3 //Several BToKee can share the same JPsi->ee
-	      || abs(ee_mass-JPsiMass_) < abs(best_JPsi_mass-JPsiMass_)) )       
+	      || abs(ee_mass-JPsiMass_) < abs(best_JPsi_mass-JPsiMass_)) )
 	  continue;
-	
+
 	//if( ee_CL_vtx < min_CL) continue; //cut on ee vtx refitting
 	*/
 
@@ -362,7 +361,7 @@ int main(int argc, char** argv) {
       best_JPsi_mass = ee_mass;
       best_Bu_mass = B_mass;
       _BToKee_sel_index = i_BToKee;
-	
+
     }
 
 
@@ -373,7 +372,7 @@ int main(int argc, char** argv) {
       
       int nGenPart = tree->nGenPart;
 
-      if(isResonant){      
+      if(isResonant){
       for(int i_Bu=0; i_Bu<nGenPart; i_Bu++){
 
 	if(abs(tree->GenPart_pdgId[i_Bu])==521){
@@ -424,7 +423,7 @@ int main(int argc, char** argv) {
 		_GenPart_BToKee_index = i_Bu;
 		break;
 	      }
-	     }	  
+	     }
 	  }//if B
 	  if(_GenPart_BToKee_index>=0) break;
 	}//loop over B
