@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TKey.h"
@@ -21,6 +22,20 @@
 #include "TPad.h"
 #include "TMultiGraph.h"
 
+///////////
+#include "RooRealVar.h"
+#include "RooDataSet.h"
+#include "RooGaussian.h"
+#include "RooChebychev.h"
+#include "RooAddPdf.h"
+#include "RooWorkspace.h"
+#include "TCanvas.h"
+#include "TAxis.h"
+#include "RooPlot.h"
+using namespace RooFit ;
+
+
+
 
 void analyzeCharged(){
 
@@ -34,7 +49,7 @@ void analyzeCharged(){
   TChain* t2 = new TChain("Events");
 
   t1->Add("/vols/cms/amartell/BParking/ntuPROD/ntu_BToKee_v18_03_22_and_21.root");
-  t2->Add("/vols/cms/amartell/BParking/ntuPROD/ntu_BToKJPsiee_v18_06_4.root");
+  t2->Add("/vols/cms/amartell/BParking/ntuPROD/ntu_BToKJPsiee_v18_06_4_and_5.root");
 
 
   int nNNR = t1->GetEntries();
@@ -54,7 +69,9 @@ void analyzeCharged(){
   h1->SetLineWidth(2);
   h2->SetLineWidth(2);
   
-  std:: string cut_gen_charge = "BToKee_gen_index != -1 && BToKee_ele1_charge[BToKee_gen_index]*BToKee_ele2_charge[BToKee_gen_index] < 0.";
+  std:: string cut_gen = "BToKee_gen_index != -1";
+
+  std:: string cut_gen_charge = cut_gen+" && BToKee_ele1_charge[BToKee_gen_index]*BToKee_ele2_charge[BToKee_gen_index] < 0.";
 
   t1->Draw("BToKee_cosAlpha[BToKee_gen_index] >> h1", cut_gen_charge.c_str());
   t2->Draw("BToKee_cosAlpha[BToKee_gen_index] >> h2", cut_gen_charge.c_str());
@@ -328,21 +345,21 @@ void analyzeCharged(){
 			   eeMassBoundary.at(ij), eeMassBoundary.at(ij+1));
     eeMassRange.push_back(cut);
 
-    eventCounts[ij] = t1->Draw(Form("BToKee_eeKFit_ee_mass[BToKee_gen_index] >> %s", hMass_bins[ij]->GetName()), 
+    eventCounts[ij] = t1->Draw(Form("BToKee_mass[BToKee_gen_index] >> %s", hMass_bins[ij]->GetName()), 
 			       (cut_gen_charge+cut_alpha+cut_CL+cut_DCA+eeMassRange.at(ij)).c_str());
 
-    eventCounts_cut0[ij] = t1->Draw(Form("BToKee_eeKFit_ee_mass[BToKee_gen_index] >> %s", hMass_bins_cut0[ij]->GetName()), 
-				    (cut_gen_charge+eeMassRange.at(ij)).c_str());
+    eventCounts_cut0[ij] = t1->Draw(Form("BToKee_mass[BToKee_gen_index] >> %s", hMass_bins_cut0[ij]->GetName()), 
+				    (cut_gen+eeMassRange.at(ij)).c_str());
 
     std::cout << " >>> non-resonant ee mass bin " << eeMassBoundary.at(ij) << "-" << eeMassBoundary.at(ij+1) 
 	      << " nEvents cut0 = " << eventCounts_cut0[ij] << " post selection = " << eventCounts[ij] << " in total MC events = " << nNNR << std::endl;
   }
 
 
-  float resonantEvents = t1->Draw("BToKee_eeKFit_ee_mass[BToKee_gen_index] >> JPsiMass_bin",
+  float resonantEvents = t2->Draw("BToKee_mass[BToKee_gen_index] >> JPsiMass_bin",
 				  (cut_gen_charge+cut_alpha+cut_CL+cut_DCA+eeMassRange.at(3)).c_str());
-  float resonantEvents_cut0 = t1->Draw("BToKee_eeKFit_ee_mass[BToKee_gen_index] >> JPsiMass_bin_cut0",
-				       (cut_gen_charge+eeMassRange.at(3)).c_str());
+  float resonantEvents_cut0 = t2->Draw("BToKee_mass[BToKee_gen_index] >> JPsiMass_bin_cut0",
+				       (cut_gen+eeMassRange.at(3)).c_str());
   
   std::cout << " >>> resonant JPsi mass bin = " << eeMassRange.at(3) 
 	    << " nEvents cut0 = "  << resonantEvents_cut0 << " post selection = " << resonantEvents << " in total MC events = " << nReso << std::endl;
@@ -357,6 +374,137 @@ void analyzeCharged(){
   JPsiMass_bin->Write();
   JPsiMass_bin_cut0->Write();
   outMassHistos.Close();
+
+
+  //setup to fit histos => for data
+
+  RooWorkspace w("w");    
+  w.factory("x[0, 10]");  
+
+  w.factory("nbackground[10000, 0, 10000]");   
+  w.factory("nsignal[100, 0.0, 10000.0]");
+
+  w.factory("Gaussian::smodel(x[0,10],mu[3,0,10],sigma[1,0, 2])");
+  RooAbsPdf * smodel = w.pdf("smodel");
+
+  w.factory("Exponential::bmodel(x,tau[-2,-3,0])");
+  RooAbsPdf * bmodel = w.pdf("bmodel");
+
+  w.factory("SUM::model(nbackground*bmodel, nsignal*smodel)");
+  RooAbsPdf * model = w.pdf("model");
+
+  //RooDataSet data("data","data",*w.var("x"),Import(tree) );
+  RooDataHist jpsi("jpsi", "jpsi", *w.var("x"), Import(*JPsiMass_bin));
+  RooDataHist jpsi0("jpsi0", "jpsi0", *w.var("x"), Import(*JPsiMass_bin_cut0));
+  //RooDataSet jpsi("jpsi","jpsi",RooArgSet("BToKee_eeKFit_ee_mass[BToKee_gen_index]"),Import(*t1),Cut((cut_gen_charge+cut_alpha+cut_CL+cut_DCA+eeMassRange.at(3)).c_str()));
+
+  RooFitResult * r = model->fitTo(jpsi, Minimizer("Minuit2"),Save(true));
+
+
+  RooPlot * plot = w.var("x")->frame();
+  plot->SetXTitle(" B mass");
+  plot->SetTitle("");
+  plot->SetAxisRange(3,7);
+  jpsi.plotOn(plot);
+  model->plotOn(plot);
+  model->plotOn(plot, Components("bmodel"),LineStyle(kDashed));
+  model->plotOn(plot, Components("smodel"),LineColor(kRed));
+
+
+  TCanvas * cc = new TCanvas();
+  cc->SetLogy(0);
+  plot->Draw();
+  cc->Print("plots_Bmass/JPsi_MC.png", "png");
+
+  RooRealVar* parS = (RooRealVar*) r->floatParsFinal().find("nsignal");
+  RooRealVar* parB = (RooRealVar*) r->floatParsFinal().find("nbackground");
+
+  std::ofstream outFileLong("countEvents_postCuts.txt", std::ios::out);
+  //  std::cout << " signal events = \t " << parS->getValV() << " error = " << parS->getError() << std::endl;
+  outFileLong << "nS= " << parS->getValV() << "\t eS= " << parS->getError() << "\t nB= " << parB->getValV() << "\t eB= " << parB->getError()
+	      << "\t eeBin= " << eeMassBoundary.at(3) << " " << eeMassBoundary.at(3+1) << std::endl;
+
+  //for nn resonant
+  for(int ij=0; ij<5; ++ij){
+    RooDataHist eeKState("eeKState", "eeKState", *w.var("x"), Import(*hMass_bins[ij]));
+    RooFitResult * reeK = model->fitTo(eeKState, Minimizer("Minuit2"),Save(true));
+
+    RooRealVar parS_nn = *((RooRealVar*) reeK->floatParsFinal().find("nsignal"));
+    RooRealVar parB_nn = *((RooRealVar*) reeK->floatParsFinal().find("nbackground"));
+
+    //    std::cout << " signal events = " << parS_nn.getValV() << " error = " << parS_nn.getError() << std::endl;
+    outFileLong << "nS= " << parS_nn.getValV() << "\t eS= " << parS_nn.getError() << "\t nB= " << parB_nn.getValV() << "\t eB= " << parB_nn.getError() 
+		<< "\t eeBin= " << eeMassBoundary.at(ij) << " " << eeMassBoundary.at(ij+1) << std::endl;
+
+    plot = w.var("x")->frame();
+    plot->SetXTitle("B mass");
+    plot->SetTitle("");
+    plot->SetAxisRange(3,7);
+    eeKState.plotOn(plot);
+    model->plotOn(plot);
+    model->plotOn(plot, Components("bmodel"),LineStyle(kDashed));
+    model->plotOn(plot, Components("smodel"),LineColor(kRed));
+
+    cc->cd();
+    cc->SetLogy(0);
+    plot->Draw();
+    cc->Print(Form("plots_Bmass/eeK_nonResonant_eeBin%.2f_%.2f.png", eeMassBoundary.at(ij), eeMassBoundary.at(ij+1)), "png");
+  }
+  outFileLong.close();
+
+  ////////
+  RooFitResult * r0 = model->fitTo(jpsi0, Minimizer("Minuit2"),Save(true));
+
+
+  RooPlot * plot0 = w.var("x")->frame();
+  plot0->SetXTitle(" B mass");
+  plot0->SetTitle("");
+  plot0->SetAxisRange(3,7);
+  jpsi0.plotOn(plot0);
+  model->plotOn(plot0);
+  model->plotOn(plot0, Components("bmodel"),LineStyle(kDashed));
+  model->plotOn(plot0, Components("smodel"),LineColor(kRed));
+
+
+  TCanvas * cc0 = new TCanvas();
+  cc0->SetLogy(0);
+  plot0->Draw();
+  cc0->Print("plots_Bmass/JPsi_MC_cut0.png", "png");
+
+  RooRealVar* parS0 = (RooRealVar*) r0->floatParsFinal().find("nsignal");
+  RooRealVar* parB0 = (RooRealVar*) r0->floatParsFinal().find("nbackground");
+
+  std::ofstream outFileLong0("countEvents_0Cuts.txt", std::ios::out);
+  //  std::cout << " signal events = " << parS0->getValV() << " error = " << parS0->getError() << std::endl;
+  outFileLong0 << "nS= " << parS0->getValV() << "\t eS= " << parS0->getError() << "\t nB= " << parB0->getValV() << "\t eB= " << parB0->getError()
+              << "\t eeBin= " << eeMassBoundary.at(3) << " " << eeMassBoundary.at(3+1) << std::endl;
+
+  for(int ij=0; ij<5; ++ij){
+    RooDataHist eeKState("eeKState", "eeKState", *w.var("x"), Import(*hMass_bins_cut0[ij]));
+    RooFitResult * reeK = model->fitTo(eeKState, Minimizer("Minuit2"),Save(true));
+
+    RooRealVar parS_nn = *((RooRealVar*) reeK->floatParsFinal().find("nsignal"));
+    RooRealVar parB_nn = *((RooRealVar*) reeK->floatParsFinal().find("nbackground"));
+
+    //    std::cout << " signal events = " << parS_nn.getValV() << " error = " << parS_nn.getError() << std::endl;
+    outFileLong0 << "nS= " << parS_nn.getValV() << "\t eS= " << parS_nn.getError() << "\t nB= " << parB_nn.getValV() << "\t eB= " << parB_nn.getError()
+		 << "\t eeBin= " << eeMassBoundary.at(ij) << " " << eeMassBoundary.at(ij+1) << std::endl;
+
+    plot0 = w.var("x")->frame();
+    plot0->SetXTitle("B mass");
+    plot0->SetTitle("");
+    plot0->SetAxisRange(3,7);
+    eeKState.plotOn(plot0);
+    model->plotOn(plot0);
+    model->plotOn(plot0, Components("bmodel"),LineStyle(kDashed));
+    model->plotOn(plot0, Components("smodel"),LineColor(kRed));
+
+    cc0->cd();
+    cc0->SetLogy(0);
+    plot0->Draw();
+    cc0->Print(Form("plots_Bmass/eeK_nonResonant_eeBin%.2f_%.2f_cut0.png", eeMassBoundary.at(ij), eeMassBoundary.at(ij+1)), "png");
+  }
+  outFileLong0.close();
 
 
 }
