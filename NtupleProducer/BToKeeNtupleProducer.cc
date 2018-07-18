@@ -1,4 +1,4 @@
-// Author: T. Strebler (IC)
+ // Author: T. Strebler (IC)
 // Date:   31 May 2018
 //
 // Add new variables from NanoAOD tree for BToKpipi analysis
@@ -169,6 +169,8 @@ int main(int argc, char** argv) {
   int _GenPart_e1FromJPsi_index = -1;
   int _GenPart_e2FromJPsi_index = -1;
   int _BToKee_gen_index = -1;
+  float _BToKee_gen_eeMass = -1;
+  float _BToKee_gen_mass = -1;
 
   if(isMC){
 
@@ -178,7 +180,8 @@ int main(int argc, char** argv) {
     tree_new->Branch("GenPart_e1FromJPsi_index",&_GenPart_e1FromJPsi_index,"GenPart_e1FromJPsi_index/I");
     tree_new->Branch("GenPart_e2FromJPsi_index",&_GenPart_e2FromJPsi_index,"GenPart_e2FromJPsi_index/I");
     tree_new->Branch("BToKee_gen_index",&_BToKee_gen_index,"BToKee_gen_index/I");
-
+    tree_new->Branch("BToKee_gen_eeMass",&_BToKee_gen_eeMass,"BToKee_gen_eeMass/F");
+    tree_new->Branch("BToKee_gen_mass",&_BToKee_gen_mass,"BToKee_gen_mass/F");
   }
 
   bool _HLT_Mu8p5_IP3p5 = false;
@@ -217,6 +220,8 @@ int main(int argc, char** argv) {
     _GenPart_e1FromJPsi_index = -1;
     _GenPart_e2FromJPsi_index = -1;
     _BToKee_gen_index = -1;
+    _BToKee_gen_eeMass = -1;
+    _BToKee_gen_mass = -1;
 
     _HLT_Mu8p5_IP3p5 = false;
     _HLT_Mu10p5_IP3p5 = false;
@@ -294,6 +299,8 @@ int main(int argc, char** argv) {
       }
 
     }//loop over muons
+
+    //    std::cout << " >>> pre skipping events no HLT " << std::endl;
 
     //when MC with trigger is available re-enable for everything
     if(_Muon_sel_index <0){
@@ -455,6 +462,10 @@ int main(int argc, char** argv) {
 				    tree->GenPart_phi[_GenPart_e2FromJPsi_index],
 				    ElectronMass_);
 
+
+      _BToKee_gen_eeMass = (gen_e1FromJPsi_tlv+gen_e2FromJPsi_tlv).Mag();
+      _BToKee_gen_mass = (gen_e1FromJPsi_tlv+gen_e2FromJPsi_tlv+gen_KFromB_tlv).Mag();
+
       float best_dR = -1.;
 
       for(int i_BToKee=0; i_BToKee<nBToKee; i_BToKee++){
@@ -489,9 +500,9 @@ int main(int argc, char** argv) {
 	  _BToKee_gen_index = i_BToKee;	  
 	}
 
-      }
+      }//match to reco
 
-    }
+    }//gen info
 
     tree_new->Fill();
 
