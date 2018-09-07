@@ -192,21 +192,19 @@ void TrainBPHClassification( TString myMethodList = "" )
   TChain* signal1 = new TChain("selectedEvents");
   TChain* background1 = new TChain("selectedEvents");
   if(whatVariable == "v0_mumu"){
-    //OLD FILES missing some variables to be updated. New files to come in /vols/cms/amartell/BParking/data_allStat/
-    signal1->Add("/vols/cms/amartell/BParking/data_allStat_old/selectedEvents_Kmumu_MC_BPHRun0.root");
+    signal1->Add("/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_MC_BPHRun0.root");
 
-    background1->Add("/vols/cms/amartell/BParking/data_allStat_old/selectedEvents_Kmumu_runA_BPHRun1.root");
-    background1->Add("/vols/cms/amartell/BParking/data_allStat_old/selectedEvents_Kmumu_runA_BPHRun2.root");
-    background1->Add("/vols/cms/amartell/BParking/data_allStat_old/selectedEvents_Kmumu_runA_BPHRun3.root");
-    background1->Add("/vols/cms/amartell/BParking/data_allStat_old/selectedEvents_Kmumu_runA_BPHRun4.root");
-    background1->Add("/vols/cms/amartell/BParking/data_allStat_old/selectedEvents_Kmumu_runA_BPHRun5.root");
-    background1->Add("/vols/cms/amartell/BParking/data_allStat_old/selectedEvents_Kmumu_runA_BPHRun6.root");
-    background1->Add("/vols/cms/amartell/BParking/data_allStat_old/selectedEvents_Kmumu_runB_BPHRun1.root");
-    background1->Add("/vols/cms/amartell/BParking/data_allStat_old/selectedEvents_Kmumu_runB_BPHRun2.root");
-    background1->Add("/vols/cms/amartell/BParking/data_allStat_old/selectedEvents_Kmumu_runB_BPHRun3.root");
-    background1->Add("/vols/cms/amartell/BParking/data_allStat_old/selectedEvents_Kmumu_runB_BPHRun4.root");
-    background1->Add("/vols/cms/amartell/BParking/data_allStat_old/selectedEvents_Kmumu_runB_BPHRun5.root");
-    //add all the other
+    background1->Add("/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_runA_BPHRun1.root");
+    background1->Add("/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_runA_BPHRun2.root");
+    background1->Add("/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_runA_BPHRun3.root");
+    background1->Add("/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_runA_BPHRun4.root");
+    background1->Add("/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_runA_BPHRun5.root");
+    background1->Add("/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_runA_BPHRun6.root");
+    background1->Add("/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_runB_BPHRun1.root");
+    background1->Add("/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_runB_BPHRun2.root");
+    background1->Add("/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_runB_BPHRun3.root");
+    background1->Add("/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_runB_BPHRun4.root");
+    background1->Add("/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_runB_BPHRun5.root");
   }
 
   TMVA::DataLoader* dataLoader = new TMVA::DataLoader("dataset");
@@ -217,9 +215,9 @@ void TrainBPHClassification( TString myMethodList = "" )
     dataLoader->AddVariable("Kll_kaon_DCASig", 'F');
     dataLoader->AddVariable("Kll_Lxy", 'F');
     dataLoader->AddVariable("Kll_ctxy", 'F');
-    //    dataLoader->AddVariable("Kll_llRefitmass", "ll inv mass post 3trks refit", 'F');
-    dataLoader->AddVariable("Kll_llmass", "ll inv mass from ll refit", 'F');
-    dataLoader->AddVariable("Kll_mass", 'F');
+    //dataLoader->AddVariable("Kll_llRefitmass", "ll inv mass post 3trks refit", 'F');
+    //dataLoader->AddVariable("Kll_llmass", "ll inv mass from ll refit", 'F');
+    //dataLoader->AddVariable("Kll_mass", 'F');
     dataLoader->AddVariable("Kll_pt", 'F');
     dataLoader->AddVariable("Kll_kaon_ptN := Kll_kaon_pt/Kll_mass", "kaon pt normalized by Kll mass", 'F');
     dataLoader->AddVariable("Kll_lep1_ptN := Kll_lep1_pt/Kll_mass", "lep1 pt normalized by Kll mass", 'F');
@@ -228,8 +226,8 @@ void TrainBPHClassification( TString myMethodList = "" )
     dataLoader->AddVariable("Kll_lep2_eta", 'F');
     dataLoader->AddVariable("Kll_lep1_phi", 'F');
     dataLoader->AddVariable("Kll_lep2_phi", 'F');
-    // dataLoader->AddVariable("Kll_lep1_pfRelIso03", 'F');
-    // dataLoader->AddVariable("Kll_lep2_pfRelIso03", 'F');
+    dataLoader->AddVariable("Kll_lep1_pfRelIso03", 'F');
+    dataLoader->AddVariable("Kll_lep2_pfRelIso03", 'F');
   }
 
 
@@ -487,5 +485,5 @@ void TrainBPHClassification( TString myMethodList = "" )
   delete factory;
   
   // Launch the GUI for the root macros
-  if (!gROOT->IsBatch()) TMVA::TMVAGui( outfileName );
+  if (!gROOT->IsBatch()) TMVA::TMVAGui( outfileName.c_str() );
 }
