@@ -215,8 +215,6 @@ void TrainBPHClassification( TString myMethodList = "" )
     dataLoader->AddVariable("Kll_kaon_DCASig", 'F');
     dataLoader->AddVariable("Kll_Lxy", 'F');
     dataLoader->AddVariable("Kll_ctxy", 'F');
-    //dataLoader->AddVariable("Kll_llRefitmass", "ll inv mass post 3trks refit", 'F');
-    //dataLoader->AddVariable("Kll_llmass", "ll inv mass from ll refit", 'F');
     //dataLoader->AddVariable("Kll_mass", 'F');
     dataLoader->AddVariable("Kll_pt", 'F');
     dataLoader->AddVariable("Kll_kaon_ptN := Kll_kaon_pt/Kll_mass", "kaon pt normalized by Kll mass", 'F');
@@ -228,6 +226,9 @@ void TrainBPHClassification( TString myMethodList = "" )
     dataLoader->AddVariable("Kll_lep2_phi", 'F');
     dataLoader->AddVariable("Kll_lep1_pfRelIso03", 'F');
     dataLoader->AddVariable("Kll_lep2_pfRelIso03", 'F');
+
+    dataLoader->AddSpectator("Kll_llRefitmass", "ll inv mass post 3trks refit", 'F');
+    dataLoader->AddSpectator("Kll_llmass", "ll inv mass from ll refit", 'F');
   }
 
 
