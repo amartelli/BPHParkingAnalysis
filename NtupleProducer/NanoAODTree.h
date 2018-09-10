@@ -22,8 +22,8 @@
 const int kMuonMax = 100;
 const int kElectronMax = 100;
 const int kBToKpipiMax = 1000000;
-const int kBToKmumuMax = 10000;
-const int kBToKeeMax = 10000;
+const int kBToKmumuMax = 50000;
+const int kBToKeeMax = 50000;
 const int kGenPartMax = 10000;
 const int kTrigObjMax = 1000;
 const int kPFCandMax = 10000;
@@ -112,11 +112,13 @@ public :
    float BToKee_kaon_pt[kBToKeeMax];
    float BToKee_kaon_eta[kBToKeeMax];
    float BToKee_kaon_phi[kBToKeeMax];
-   float BToKee_ele1_charge[kBToKeeMax];
+   int BToKee_ele1_index[kBToKeeMax];
+   int BToKee_ele1_charge[kBToKeeMax];
    float BToKee_ele1_pt[kBToKeeMax];
    float BToKee_ele1_eta[kBToKeeMax];
    float BToKee_ele1_phi[kBToKeeMax];
-   float BToKee_ele2_charge[kBToKeeMax];
+   int BToKee_ele2_index[kBToKeeMax];
+   int BToKee_ele2_charge[kBToKeeMax];
    float BToKee_ele2_pt[kBToKeeMax];
    float BToKee_ele2_eta[kBToKeeMax];
    float BToKee_ele2_phi[kBToKeeMax];
@@ -284,9 +286,13 @@ void NanoAODTree::Init(TChain* tree)
     _tree->SetBranchAddress("BToKee_ele1_pt",&BToKee_ele1_pt);
     _tree->SetBranchAddress("BToKee_ele1_eta",&BToKee_ele1_eta);
     _tree->SetBranchAddress("BToKee_ele1_phi",&BToKee_ele1_phi);
+    _tree->SetBranchAddress("BToKee_ele1_index",&BToKee_ele1_index);
+    _tree->SetBranchAddress("BToKee_ele1_charge",&BToKee_ele1_charge);
     _tree->SetBranchAddress("BToKee_ele2_pt",&BToKee_ele2_pt);
     _tree->SetBranchAddress("BToKee_ele2_eta",&BToKee_ele2_eta);
     _tree->SetBranchAddress("BToKee_ele2_phi",&BToKee_ele2_phi);
+    _tree->SetBranchAddress("BToKee_ele2_charge",&BToKee_ele2_charge);
+    _tree->SetBranchAddress("BToKee_ele2_index",&BToKee_ele2_index);
   }
 
   int isMC = _tree->SetBranchAddress("nGenPart",&nGenPart);
@@ -349,7 +355,18 @@ void NanoAODTree::Init(TChain* tree)
 Int_t NanoAODTree::GetEntry(int entry)
 {
 
-  return _tree->GetEntry(entry);
+  int out = _tree->GetEntry(entry);
+
+  if(nMuon>kMuonMax) return -1;
+  if(nElectron>kElectronMax) return -1;
+  if(nBToKpipi>kBToKpipiMax) return -1;
+  if(nBToKmumu>kBToKmumuMax) return -1;
+  if(nBToKee>kBToKeeMax) return -1;
+  if(nGenPart>kGenPartMax) return -1;
+  if(nTrigObj>kTrigObjMax)  return -1;
+  if(nPFCand>kPFCandMax) return -1;
+
+  return out;
 
 } 
 

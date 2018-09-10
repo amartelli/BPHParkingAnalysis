@@ -156,9 +156,11 @@ int main(int argc, char** argv) {
 
   int _Muon_sel_index = -1;
   int _BToKee_sel_index = -1;
+  float _BToKee_eePrefit_mass = -1;
 
   tree_new->Branch("Muon_sel_index",&_Muon_sel_index,"Muon_sel_index/I");
   tree_new->Branch("BToKee_sel_index",&_BToKee_sel_index,"BToKee_sel_index/I");
+  tree_new->Branch("BToKee_eePrefit_mass",&_BToKee_eePrefit_mass,"BToKee_eePrefit_mass/F");
 
   int _GenPart_BToKee_index = -1;
   int _GenPart_JPsiFromB_index = -1;
@@ -216,12 +218,17 @@ int main(int argc, char** argv) {
 
   for (int iEntry = 0; iEntry < nentries ; iEntry++){
 
-    tree->GetEntry(iEntry);
+    int out = tree->GetEntry(iEntry);
+    if(out<0){
+      cout<<"Error retrievieng entry #"<<iEntry<<endl;
+      return -1;
+    }
 
     if(iEntry%10000==0) cout<<"Entry #"<<iEntry<<" "<< int(100*float(iEntry)/nentries)<<"%"<<endl;
 
     _Muon_sel_index = -1;
     _BToKee_sel_index = -1;
+    _BToKee_eePrefit_mass = -1;
 
     _GenPart_BToKee_index = -1;
     _GenPart_JPsiFromB_index = -1;
@@ -327,8 +334,17 @@ int main(int argc, char** argv) {
       if( best_B_CL_vtx < 0. || B_CL_vtx>best_B_CL_vtx ){      
 	best_B_CL_vtx = B_CL_vtx;
 	_BToKee_sel_index = i_BToKee;
-      }
 
+	TLorentzVector ele1cand;
+	ele1cand.SetPtEtaPhiM(tree->Electron_pt[tree->BToKee_ele1_index[i_BToKee]], tree->Electron_eta[tree->BToKee_ele1_index[i_BToKee]],
+			      tree->Electron_phi[tree->BToKee_ele1_index[i_BToKee]], tree->Electron_mass[tree->BToKee_ele1_index[i_BToKee]]);
+
+	TLorentzVector ele2cand;
+	ele2cand.SetPtEtaPhiM(tree->Electron_pt[tree->BToKee_ele2_index[i_BToKee]], tree->Electron_eta[tree->BToKee_ele2_index[i_BToKee]],
+			      tree->Electron_phi[tree->BToKee_ele2_index[i_BToKee]], tree->Electron_mass[tree->BToKee_ele2_index[i_BToKee]]);
+
+	_BToKee_eePrefit_mass = (ele1cand+ele2cand).Mag();
+      }
     }
 
 
