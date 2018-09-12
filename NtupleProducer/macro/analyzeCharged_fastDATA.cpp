@@ -95,8 +95,11 @@ int main(int argc, char *argv[]){
     if((dataset == "runB" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKee_2018B_BPH4/*root");
     if((dataset == "runB" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKee_2018B_BPH5/*root");
 
-    if(dataset == "MC"){
-      t1->Add("/vols/cms/amartell/BParking/ntuPROD/newNANO_20Aug/ntu_BToKee_18_08_14.root");
+    if(dataset == "MC" && BPHRun == "nnResonant"){
+      t1->Add("/vols/cms/amartell/BParking/ntuPROD/newNANO_20Aug/ntu_BToKee_18_09_10.root");
+    }
+    if(dataset == "MC" && BPHRun == "Resonant"){
+      t1->Add("/vols/cms/amartell/BParking/ntuPROD/newNANO_20Aug/ntu_BToKJPsiee_18_09_10.root");
     }
   }
   else{
@@ -113,9 +116,11 @@ int main(int argc, char *argv[]){
     if((dataset == "runB" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking4_2018B_18_08_14_new/*root");
     if((dataset == "runB" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking5_2018B_18_08_14_new/*root");
 
-    if(dataset == "MC"){
-      //t1->Add("/vols/cms/amartell/BParking/ntuPROD/newNANO_20Aug/ntu_BToKmumu_18_08_14.root");
+    if(dataset == "MC" && BPHRun == "nnResonant"){
       t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BToKmumu_18_08_14_new/*root");
+    }
+    if(dataset == "MC" && BPHRun == "Resonant"){
+      t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BToKJPsimumu_18_08_14_new/*root");
     }
   }
 
@@ -251,11 +256,11 @@ int main(int argc, char *argv[]){
   
   t1->SetBranchStatus("*", 0);
 
-  /*
+
   t1->SetBranchStatus("run", 1);                        t1->SetBranchAddress("run", &run);
   t1->SetBranchStatus("luminosityBlock", 1);            t1->SetBranchAddress("luminosityBlock", &lumi);
   t1->SetBranchStatus("event", 1);                      t1->SetBranchAddress("event", &event);
-  */
+
   if(isEleFinalState){
     t1->SetBranchStatus("Muon_sel_index", 1);            t1->SetBranchAddress("Muon_sel_index", &MuonTag_index);
     t1->SetBranchStatus("BToKee_sel_index", 1);          t1->SetBranchAddress("BToKee_sel_index", &BToKll_sel_index);
@@ -493,7 +498,7 @@ int main(int argc, char *argv[]){
     ++nEv_muonTag[0];
 
     if(BToKll_sel_index == -1) continue; 
-    if(dataset == "MC" && BToKll_sel_index != BToKll_gen_index) continue;
+    if(dataset == "MC" && BPHRun == "nnResonant" && BToKll_sel_index != BToKll_gen_index) continue;
     ++nEv_recoCand[0];
 
 
@@ -649,7 +654,9 @@ int main(int argc, char *argv[]){
     else hLep1pt_EE[5]->Fill(BToKll_lep1_pt[BToKll_sel_index]);
     if(std::abs(BToKll_lep2_eta[BToKll_sel_index]) < 1.47) hLep2pt_EB[5]->Fill(BToKll_lep2_pt[BToKll_sel_index]);
     else hLep2pt_EE[5]->Fill(BToKll_lep2_pt[BToKll_sel_index]);
-    
+
+    if(massBin == 3 && BToKll_mass[BToKll_sel_index] < 6.)
+      std::cout << run << " " << lumi << " " << event << std::endl;
   }//loop over events
 
   
