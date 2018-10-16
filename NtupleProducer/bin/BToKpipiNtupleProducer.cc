@@ -1,13 +1,3 @@
-// Author: T. Strebler (IC)
-// Date:   31 May 2018
-//
-// Add new variables from NanoAOD tree for BToKpipi analysis
-// Can be either included in a interpreted macro or compiled in c++
-// (use `root-config --glibs --cflags`)
-//
-
-
-
 #include <iostream>
 #include "TFile.h"
 #include "TTree.h"
@@ -37,9 +27,7 @@ int main(int argc, char** argv) {
 
   string status_sample = *(argv + 1);
   bool isMC = false;
-  bool isData = false;
   if (status_sample.compare("mc") == 0) isMC = true;
-  if (status_sample.compare("data") == 0) isData = true;
 
   bool isBPHParking = false;
   for (int i = 1; i < argc; ++i) {
@@ -274,7 +262,7 @@ int main(int argc, char** argv) {
 
 	bool isTrigMatched = false;
 	int nTrigObj = tree->nTrigObj;
-	for(unsigned int i_trig = 0; i_trig<nTrigObj; i_trig++){
+	for(int i_trig = 0; i_trig<nTrigObj; i_trig++){
 
 	  if( tree->TrigObj_id[i_trig]==13 && ((tree->TrigObj_filterBits[i_trig])>>3)&1 ){
 	    TLorentzVector trig;
@@ -342,7 +330,7 @@ int main(int argc, char** argv) {
 
       //B+ D0 selection
       if ( !(best_CL_D0 < 0.
-	     || abs(best_CL_D0-Kpi_CL_vtx)<1e-3 && B_CL_vtx > best_CL_Bu //Several BToKpipi can share the same D0->Kpi, pick the best triplet out of those
+	     || (abs(best_CL_D0-Kpi_CL_vtx)<1e-3 && B_CL_vtx > best_CL_Bu) //Several BToKpipi can share the same D0->Kpi, pick the best triplet out of those
 	     || (abs(best_CL_D0-Kpi_CL_vtx)>1e-3 && Kpi_CL_vtx>best_CL_D0) ) )
 	continue;
       

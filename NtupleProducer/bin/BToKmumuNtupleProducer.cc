@@ -1,13 +1,3 @@
-// Author: T. Strebler (IC)
-// Date:   31 May 2018
-//
-// Add new variables from NanoAOD tree for BToKpipi analysis
-// Can be either included in a interpreted macro or compiled in c++
-// (use `root-config --glibs --cflags`)
-//
-
-
-
 #include <iostream>
 #include <fstream>
 #include "TFile.h"
@@ -300,7 +290,7 @@ int main(int argc, char** argv) {
 
 	bool isTrigMatched = false;
 	int nTrigObj = tree->nTrigObj;
-	for(unsigned int i_trig = 0; i_trig<nTrigObj; i_trig++){
+	for(int i_trig = 0; i_trig<nTrigObj; i_trig++){
 
 	  if( tree->TrigObj_id[i_trig]==13 && ((tree->TrigObj_filterBits[i_trig])>>3)&1 ){
 	    TLorentzVector trig;
