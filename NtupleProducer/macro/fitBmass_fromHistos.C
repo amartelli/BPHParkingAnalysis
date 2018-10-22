@@ -1,7 +1,9 @@
 //plot and fit BToKll 
 
 //example to run
-//root -l fitBmass_fromHistos.C'(1, "/vols/cms/amartell/BParking/data/outMassHistos_Kee_runAB_allStatTightestSelections.root")' 
+//root fitBmass_fromHistos.C'(1, "/vols/cms/amartell/BParking/data_allStat/outMassHistos_Kee_tightSel_KeePrefitMass.root")'
+//root fitBmass_fromHistos.C'(0, "/vols/cms/amartell/BParking/data_allStat/outMassHistos_Kmumu_tightSel.root")'
+
 
 #include <iostream>
 #include <fstream>
@@ -36,6 +38,7 @@
 #include "RooAddPdf.h"
 #include "RooWorkspace.h"
 #include "RooFitResult.h"
+#include "TText.h"
 #include "TCanvas.h"
 #include "TAxis.h"
 #include "RooPlot.h"
@@ -63,31 +66,39 @@ void fitBmass_fromHistos(int isEleFinalState, std::string inFile){
   llMassBoundary.push_back(2.9);
   llMassBoundary.push_back(3.2);
   llMassBoundary.push_back(3.58);
+  llMassBoundary.push_back(100.);
 
 
-  TH1F* h_Bmass[6];
-  for(int ij=0; ij<6; ++ij){
+  TH1F* h_Bmass[7];
+  for(int ij=0; ij<7; ++ij){
     h_Bmass[ij] = (TH1F*)inF->Get(Form("Bmass_%d", ij))->Clone(Form("h_Bmass_%d", ij));
+    //h_Bmass[ij] = (TH1F*)inF->Get(Form("Bmass_llPrefit_%d", ij))->Clone(Form("h_Bmass_%d", ij));
+    //h_Bmass[ij] = (TH1F*)inF->Get(Form("Bmass_KRefit_%d", ij))->Clone(Form("h_Bmass_%d", ij));
     //    h_Bmass[ij]->GetXaxis()->SetRangeUser(4.5, 6.);
   }//loop
 
 
   //now fitting
-  float nEv_postFit[6] = {0.};
-  float nEvError_postFit[6] = {0.};
-  float nBkg_postFit[6] = {0.};
-  float nBkgError_postFit[6] = {0.};
+  float nEv_postFit[7] = {0.};
+  float nEvError_postFit[7] = {0.};
+  float nBkg_postFit[7] = {0.};
+  float nBkgError_postFit[7] = {0.};
+  float nBkgInt_postFit[7] = {0.};
+  float nBkgIntError_postFit[7] = {0.};
   float chi2[6] = {0.};
 
-  for(int ij=0; ij<6; ++ij){
+  for(int ij=0; ij<7; ++ij){
     RooWorkspace w("w");    
     //w.factory("x[0, 10]");  
     w.factory("x[4.5, 6.]");  
-    
+
+
+
     w.factory("nbackground[10000, 0, 100000]");   
     w.factory("nsignal[100, 0.0, 10000]");
     
     w.factory("Gaussian::smodel(x,mu[5.3,4.5,6],sigma[0.05,0,0.2])");
+    //w.factory("Gaussian::smodel(x,mu[5.3,4.5,6],sigma[0.02,0,0.03])");
     //w.factory("RooCBShape::smodel(x,m[5.3,4.5,6],s[0.1,0.,1.],a[1.2,0.,3.],n[1,0.1,6.])");
 
     //w.factory("RooCBShape::CBall(x[0,15], mean[11000,13000], sigma[5000,200000], alpha[0,10000],n[0,100000])");
@@ -107,11 +118,11 @@ void fitBmass_fromHistos(int isEleFinalState, std::string inFile){
 
     RooPlot * plot = w.var("x")->frame();
     if(isEleFinalState){
-      if(ij == 0) plot->SetXTitle("K(JPsi)ee mass (GeV)");
+      if(ij == 3) plot->SetXTitle("K(JPsi)ee mass (GeV)");
       else plot->SetXTitle("Kee mass (GeV)");
     }
     else{
-      if(ij == 0) plot->SetXTitle("K(JPsi)#mu#mu mass (GeV)");
+      if(ij == 3) plot->SetXTitle("K(JPsi)#mu#mu mass (GeV)");
       else plot->SetXTitle("K#mu#mu mass (GeV)");
     }
     plot->SetTitle("");
@@ -122,13 +133,6 @@ void fitBmass_fromHistos(int isEleFinalState, std::string inFile){
     model->plotOn(plot, Components("smodel"),LineColor(kRed));
     chi2[ij] = plot->chiSquare();
 
-
-    TCanvas * cc = new TCanvas();
-    cc->SetLogy(0);
-    plot->Draw();
-    if(isEleFinalState) cc->Print(Form("plots/Bmass_DA/Kee_%s.png",h_Bmass[ij]->GetName()), "png");
-    else cc->Print(Form("plots/Bmass_DA/Kmumu_%s.png",h_Bmass[ij]->GetName()), "png");
-
     RooRealVar* parS = (RooRealVar*) r->floatParsFinal().find("nsignal");
     RooRealVar* parB = (RooRealVar*) r->floatParsFinal().find("nbackground");
     nEv_postFit[ij] = parS->getValV();
@@ -136,17 +140,67 @@ void fitBmass_fromHistos(int isEleFinalState, std::string inFile){
     nBkg_postFit[ij] = parB->getValV();
     nBkgError_postFit[ij] = parB->getError();
 
-    std::cout << " JPsi selection signal events = \t " << parS->getValV() << " error = " << parS->getError() 
+    std::cout << " **** JPsi selection signal events = \t " << parS->getValV() << " error = " << parS->getError() 
 	      << " bkg events = " << parB->getValV() << " error = " << parB->getError() << std::endl;
+
+
+    RooRealVar* parMean = (RooRealVar*) r->floatParsFinal().find("mu");
+    RooRealVar* parSigma = (RooRealVar*) r->floatParsFinal().find("sigma");
+
+    float meanVal = parMean->getValV();
+    float sigmaVal = parSigma->getValV();
+
+    std::cout << "\n  parMean = " << parMean->getValV() << " parSigma = " << parSigma->getValV() << std::endl;
+    
+    w.var("x")->setRange("signalRange", meanVal - 3.*sigmaVal, meanVal + 3.*sigmaVal);
+    RooAbsReal* bkgIntegral = w.pdf("bmodel")->createIntegral(*(w.var("x")), NormSet(*(w.var("x"))), Range("signalRange")) ;
+    // w.var("x")->setRange("signalRange", 4.5, 6.);
+    // RooAbsReal* bkgIntegral = w.pdf("bmodel")->createIntegral(*(w.var("x")), NormSet(*(w.var("x"))), Range("signalRange")) ;
+    std::cout << "\n  bkgIntegral = " << bkgIntegral->getVal() << std::endl;
+    nBkgInt_postFit[ij] = bkgIntegral->getVal() * nBkg_postFit[ij];
+    nBkgIntError_postFit[ij] = nBkgError_postFit[ij] * bkgIntegral->getVal();
+
+    // Add text to frame
+    /*
+    TText* txt = new TText(0.8,0.9, Form("Signal %.1f +/- %1.f",nEv_postFit[ij], nEvError_postFit[ij]));
+    TText* txt2 = new TText(0.8,0.8, Form("Bkg %.1f +/- %1.f", nBkgInt_postFit[ij], nBkgIntError_postFit[ij]));
+    txt->SetTextSize(0.04);
+    txt->SetTextColor(kRed);
+    txt2->SetTextSize(0.04);
+    txt2->SetTextColor(kRed);
+    plot->addObject(txt);
+    plot->addObject(txt2);
+    */
+
+    TCanvas * cc = new TCanvas();
+    cc->SetLogy(0);
+    plot->Draw();
+
+    TLatex tL;
+    tL.SetNDC();
+    tL.SetTextSize(0.05);
+     tL.SetTextFont(42);
+    tL.DrawLatex(0.65,0.9, Form("S %.1f +/- %1.f",nEv_postFit[ij], nEvError_postFit[ij]));
+    TLatex tL2;
+    tL2.SetNDC();
+    tL2.SetTextSize(0.05);
+    tL2.SetTextFont(42);
+    tL2.DrawLatex(0.65,0.85, Form("B %.1f +/- %1.f",nBkgInt_postFit[ij], nBkgIntError_postFit[ij]));
+
+
+    if(isEleFinalState) cc->Print(Form("plots/Bmass_DATA/Kee_%s.png",h_Bmass[ij]->GetName()), "png");
+    else cc->Print(Form("plots/Bmass_DATA/Kmumu_%s.png",h_Bmass[ij]->GetName()), "png");
   }
   
 
   std::cout << " ***** summary ***** "<< std::endl;
-  for(int ij=0; ij<6; ++ij){
+  for(int ij=0; ij<7; ++ij){
 
     std::cout << "\n \n  category: " << h_Bmass[ij]->GetName()
 	      << "\n \t signal = " << nEv_postFit[ij] << "+/-" << nEvError_postFit[ij]
-              << "\n \t bkg = " << nBkg_postFit[ij] << "+/-" << nBkgError_postFit[ij] << " chi2 = " << chi2[ij] << std::endl;
+              << "\n \t bkg = " << nBkg_postFit[ij] << "+/-" << nBkgError_postFit[ij] 
+	      << "\n \t bkg in +/- 3sigma = " << nBkgInt_postFit[ij] << " +/- " << nBkgIntError_postFit[ij]
+	      << " chi2 = " << chi2[ij] << std::endl;
   }
 
 }

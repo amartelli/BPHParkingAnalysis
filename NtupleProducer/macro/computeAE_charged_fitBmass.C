@@ -80,19 +80,21 @@ void computeAE_charged_fitBmass(std::string nonResonantFile, std::string Resonan
 
   //selections
   std::string cut_muonTag = "Muon_sel_index != -1";
-  std::string cut_Recocandidate = "BToKee_sel_index != -1";
+  std::string cut_Recocandidate = "BToKee_sel_index != -1 && BToKee_gen_index != -1 && BToKee_sel_index == BToKee_gen_index";
   std::string cut_chargeEff = "BToKee_ele1_charge[BToKee_sel_index]*BToKee_ele2_charge[BToKee_sel_index] < 0.";
-  std::string cut_alphaEff = "BToKee_cosAlpha[BToKee_sel_index] > 0.99";
-  std::string cut_vtxCLEff = "BToKee_CL_vtx[BToKee_sel_index] > 0.1";  
-  std::string cut_LxyEff  = "BToKee_Lxy[BToKee_sel_index] > 6";
+  std::string cut_pTEff = "BToKee_pt[BToKee_sel_index] >= 10. && BToKee_kaon_pt[BToKee_sel_index] >= 1.5";
+  std::string cut_alphaEff = "BToKee_cosAlpha[BToKee_sel_index] >= 0.999";
+  std::string cut_vtxCLEff = "BToKee_CL_vtx[BToKee_sel_index] >= 0.1";  
+  std::string cut_LxyEff  = "BToKee_Lxy[BToKee_sel_index] >= 6";
 
   if(!isEleFinalState){
     cut_muonTag = "Muon_probe_index != -1";
-    cut_Recocandidate = "BToKmumu_sel_index != -1";
+    cut_Recocandidate = "BToKmumu_sel_index != -1 && BToKmumu_gen_index != -1 && BToKmumu_sel_index == BToKmumu_gen_index";
     cut_chargeEff = "BToKmumu_mu1_charge[BToKmumu_sel_index]*BToKmumu_mu2_charge[BToKmumu_sel_index] < 0.";
-    cut_alphaEff = "BToKmumu_cosAlpha[BToKmumu_sel_index] > 0.99";
-    cut_vtxCLEff = "BToKmumu_CL_vtx[BToKmumu_sel_index] > 0.1";
-    cut_LxyEff  = "BToKmumu_Lxy[BToKmumu_sel_index] > 6";
+    cut_pTEff = "BToKmumu_pt[BToKmumu_sel_index] >= 10. && BToKmumu_kaon_pt[BToKmumu_sel_index] >= 1.5";
+    cut_alphaEff = "BToKmumu_cosAlpha[BToKmumu_sel_index] >= 0.999";
+    cut_vtxCLEff = "BToKmumu_CL_vtx[BToKmumu_sel_index] >= 0.1";
+    cut_LxyEff  = "BToKmumu_Lxy[BToKmumu_sel_index] >= 6";
   }
 
   std::vector<std::string> llMassCut;
@@ -105,8 +107,9 @@ void computeAE_charged_fitBmass(std::string nonResonantFile, std::string Resonan
   llMassBoundary.push_back(2.9);
   llMassBoundary.push_back(3.3);
   llMassBoundary.push_back(3.58);
+  llMassBoundary.push_back(100.);
 
-  for(int ij=0; ij<5; ++ij){
+  for(int ij=0; ij<6; ++ij){
     std::string cut = Form("BToKee_eeKFit_ee_mass[BToKee_sel_index] > %.2f && BToKee_eeKFit_ee_mass[BToKee_sel_index] < %.2f",
                            llMassBoundary.at(ij), llMassBoundary.at(ij+1));
     std::string gencut = Form("BToKee_gen_eeMass > %.2f && BToKee_gen_eeMass < %.2f",
@@ -124,42 +127,42 @@ void computeAE_charged_fitBmass(std::string nonResonantFile, std::string Resonan
     else llGenMassCut.push_back(" 1 == 1");
   }
 
-  //non resonant first - JPsi last
-  float nEv_muonTag[6] = {0.};
-  float nEv_recoCand[6] = {0.};
-  float nEv_chargeEff[6] = {0.};
-  float nEv_alphaEff[6] = {0.};
-  float nEv_vtxCLEff[6] = {0.};
-  float nEv_LxyEff[6] = {0.};
+  //JPsi first - non resonant last
+  float nEv_muonTag[7] = {0.};
+  float nEv_recoCand[7] = {0.};
+  float nEv_chargeEff[7] = {0.};
+  float nEv_alphaEff[7] = {0.};
+  float nEv_vtxCLEff[7] = {0.};
+  float nEv_LxyEff[7] = {0.};
 
-  TH1F* h_Bmass_llbin[6];
+  TH1F* h_Bmass_llbin[7];
   h_Bmass_llbin[0] = new TH1F(Form("h_Bmass_JPsi_%.2f-%.2f", llMassBoundary.at(3), llMassBoundary.at(3+1)), "", 1000, 0., 10.);
   if(isEleFinalState){
     nEv_muonTag[0] = t2->Draw("Muon_sel_index", (cut_muonTag+" && "+llGenMassCut.at(3)).c_str(), "goff");
     nEv_LxyEff[0] = t2->Draw(Form("BToKee_mass[BToKee_sel_index] >> %s", h_Bmass_llbin[0]->GetName()),
-    (cut_muonTag+" && "+cut_Recocandidate+" && "+cut_chargeEff+" && "+cut_alphaEff+" && "+cut_vtxCLEff+" && "+cut_LxyEff+" && "+llMassCut.at(3)+" && "+llGenMassCut.at(3)).c_str());
+    (cut_muonTag+" && "+cut_Recocandidate+" && "+cut_chargeEff+" && "+cut_pTEff+" && "+cut_alphaEff+" && "+cut_vtxCLEff+" && "+cut_LxyEff+" && "+llMassCut.at(3)+" && "+llGenMassCut.at(3)).c_str());
   }
   else{
     nEv_muonTag[0] = t2->Draw("Muon_sel_index", (cut_muonTag+" && "+llGenMassCut.at(3)).c_str(), "goff");
     nEv_LxyEff[0] = t2->Draw(Form("BToKmumu_mass[BToKmumu_sel_index] >> %s", h_Bmass_llbin[0]->GetName()),
-    (cut_muonTag+" && "+cut_Recocandidate+" && "+cut_chargeEff+" && "+cut_alphaEff+" && "+cut_vtxCLEff+" && "+cut_LxyEff+" && "+llMassCut.at(3)+" && "+llGenMassCut.at(3)).c_str());
+    (cut_muonTag+" && "+cut_Recocandidate+" && "+cut_chargeEff+" && "+cut_pTEff+" && "s+cut_alphaEff+" && "+cut_vtxCLEff+" && "+cut_LxyEff+" && "+llMassCut.at(3)+" && "+llGenMassCut.at(3)).c_str());
   }
   
   std::cout << " tot JPsi_MC muonTag events = " << nEv_muonTag[0] << std::endl;
   std::cout << " tot JPsi_MC endSelection Events = " << nEv_LxyEff[0] << std::endl;
 
-  for(int ij=0; ij<5; ++ij){
+  for(int ij=0; ij<6; ++ij){
     h_Bmass_llbin[ij+1] = new TH1F(Form("h_Bmass_bin_%.2f-%.2f", llMassBoundary.at(ij), llMassBoundary.at(ij+1)), "", 1000, 0., 10.);
 
     if(isEleFinalState){
       nEv_muonTag[ij+1] = t1->Draw("Muon_sel_index", (cut_muonTag+" && "+llGenMassCut.at(ij)).c_str(), "goff");
       nEv_LxyEff[ij+1] = t1->Draw(Form("BToKee_mass[BToKee_sel_index] >> %s", h_Bmass_llbin[ij+1]->GetName()),
-      (cut_muonTag+" && "+cut_Recocandidate+" && "+cut_chargeEff+" && "+cut_alphaEff+" && "+cut_vtxCLEff+" && "+cut_LxyEff+" && "+llMassCut.at(ij)+" && "+llGenMassCut.at(ij)).c_str());
+      (cut_muonTag+" && "+cut_Recocandidate+" && "+cut_chargeEff+" && "+cut_pTEff+" && "+cut_alphaEff+" && "+cut_vtxCLEff+" && "+cut_LxyEff+" && "+llMassCut.at(ij)+" && "+llGenMassCut.at(ij)).c_str());
     }
     else{
       nEv_muonTag[ij+1] = t1->Draw("Muon_sel_index", (cut_muonTag+" && "+llGenMassCut.at(ij)).c_str(), "goff");
       nEv_LxyEff[ij+1] = t1->Draw(Form("BToKmumu_mass[BToKmumu_sel_index] >> %s", h_Bmass_llbin[ij+1]->GetName()),
-      (cut_muonTag+" && "+cut_Recocandidate+" && "+cut_chargeEff+" && "+cut_alphaEff+" && "+cut_vtxCLEff+" && "+cut_LxyEff+" && "+llMassCut.at(ij)+" && "+llGenMassCut.at(ij)).c_str());
+      (cut_muonTag+" && "+cut_Recocandidate+" && "+cut_chargeEff+" && "+cut_pTEff+" && "+cut_alphaEff+" && "+cut_vtxCLEff+" && "+cut_LxyEff+" && "+llMassCut.at(ij)+" && "+llGenMassCut.at(ij)).c_str());
     }
     std::cout << " tot nonResonant_MC muonTag events = " << nEv_muonTag[ij+1] << " in mass bin " << llMassCut.at(ij) << std::endl;
     std::cout << " tot nonResonant_MC endSelection Events = " << nEv_LxyEff[ij+1] << std::endl;
@@ -170,15 +173,15 @@ void computeAE_charged_fitBmass(std::string nonResonantFile, std::string Resonan
   if(!isEleFinalState) outName ="outMassHistos_MC_mumu.root";
   TFile outMassHistos(outName.c_str(), "recreate");
   outMassHistos.cd();
-  for(int ij=0; ij<6; ++ij)
+  for(int ij=0; ij<7; ++ij)
     h_Bmass_llbin[ij]->Write(h_Bmass_llbin[ij]->GetName());
   outMassHistos.Close();
 
 
 
   //now fitting
-  float nEv_postFit[6] = {0.};
-  float nEvError_postFit[6] = {0.};
+  float nEv_postFit[7] = {0.};
+  float nEvError_postFit[7] = {0.};
 
   RooWorkspace w("w");    
   w.factory("x[0, 10]");  
@@ -187,9 +190,13 @@ void computeAE_charged_fitBmass(std::string nonResonantFile, std::string Resonan
   w.factory("nbackground[10000, 0, 10000]");   
   w.factory("nsignal[100, 0.0, 10000.0]");
 
-  for(int ij=0; ij<6; ++ij){
+  for(int ij=0; ij<7; ++ij){
+
+    h_Bmass_llbin[ij]->Rebin(2);
+
+    w.factory("Gaussian::smodel(x,mu[5.3,4.5,6],sigma[0.05,0,0.2])");
     //w.factory("Gaussian::smodel(x,mu[5.3,4.5,6],sigma[0.05,0,0.2])");
-    w.factory("RooCBShape::smodel(x,m[5.3,4.5,6],s[0.1,0.,1.],a[1.2,0.,3.],n[1,0.1,6.])");
+    //w.factory("RooCBShape::smodel(x,m[5.3,4.5,6],s[0.1,0.,1.],a[1.2,0.,3.],n[1,0.1,6.])");
     //w.factory("RooCBShape::CBall(x[0,15], mean[11000,13000], sigma[5000,200000], alpha[0,10000],n[0,100000])");
     RooAbsPdf * smodel = w.pdf("smodel");
     
@@ -213,7 +220,7 @@ void computeAE_charged_fitBmass(std::string nonResonantFile, std::string Resonan
       else plot->SetXTitle("K#mu#mu mass (GeV)");
     }
     plot->SetTitle("");
-    plot->SetAxisRange(4.,6);
+    plot->SetAxisRange(4.5,6);
     hBMass.plotOn(plot);
     model->plotOn(plot);
     model->plotOn(plot, Components("bmodel"),LineStyle(kDashed));
@@ -237,18 +244,18 @@ void computeAE_charged_fitBmass(std::string nonResonantFile, std::string Resonan
   float errb = pow(nEvError_postFit[0]/nEv_postFit[0], 2);
 
   std::cout << " ***** summary ***** "<< std::endl;
-  for(int ij=0; ij<6; ++ij){
+  for(int ij=0; ij<7; ++ij){
 
     float errRatio = pow(nEvError_postFit[ij]/nEv_postFit[ij], 2) + errb;
     errRatio = sqrt(errRatio) * nEvError_postFit[ij]/nEvError_postFit[0];
 
     std::cout << "\n \n  category: " << h_Bmass_llbin[ij]->GetName()
               << " \t integral muonTag = " << nEv_muonTag[ij]
-              << " evtCount " << nEv_LxyEff[ij] << " postFit " << nEv_postFit[ij] <<"+/-"<<nEvError_postFit[ij]
+              << " evtCount " << nEv_LxyEff[ij] << " withFit " << nEv_postFit[ij] <<"+/-"<<nEvError_postFit[ij]
               << "\n \t\t\t eff(/muonTag)    evtCount " << nEv_LxyEff[ij]/nEv_muonTag[ij]
-              << " postFit " << nEv_postFit[ij]/nEv_muonTag[ij] << "+/-" << nEvError_postFit[ij]/nEv_muonTag[ij]
+              << " withFit " << nEv_postFit[ij]/nEv_muonTag[ij] << "+/-" << nEvError_postFit[ij]/nEv_muonTag[ij]
               << "\n  \t\t\t double ratio wrt JPsi    evtCount " << (nEv_LxyEff[ij]/nEv_muonTag[ij])/(nEv_LxyEff[0]/nEv_muonTag[0])
-              << " postFit " << (nEv_postFit[ij]/nEv_muonTag[ij])/(nEv_postFit[0]/nEv_muonTag[0]) << "+/-"<<errRatio<< std::endl;
+              << " withFit " << (nEv_postFit[ij]/nEv_muonTag[ij])/(nEv_postFit[0]/nEv_muonTag[0]) << "+/-"<<errRatio<< std::endl;
   }
 
 }
