@@ -1,10 +1,7 @@
 //g++ -Wall -o analyzeCharged_fastDATA `root-config --cflags --glibs` -lRooFitCore analyzeCharged_fastDATA.cpp
-//
-//to run on ele all dataset 
-// ./analyzeCharged_fastDATA 1 -1
-//to run on muon runA
-// ./analyzeCharged_fastDATA 0  runA
-// options are: isEleFinalState (1, 0)   dataset (-1, runA, runB, MC)  run (1,2,3,... ) nMaxEvents (-1, N)   saveOUTntu
+
+//./analyzeCharged_fastDATA --isEle (0,1) --dataset (-1, runA, runB, MC) --run (1,2,3,...) --typeSelection (tighCB, NN_BkgR, NN_SigEff) --ntupleList (list.txt) --JOBid (1,2..) --outputFolder ("outfolder") --nMaxEvents (-1, N) --saveSelectedNTU (1,0)
+
 
 #include <iostream>
 #include <fstream>
@@ -50,27 +47,134 @@ using namespace RooFit;
 
 const int kBToKllMax = 50000;
 const int kMuonMax = 100;
-
+const int kPFCandMax = 10000;
+const int kGenPartMax = 10000;
 const float ElectronMass = 0.5109989e-3;
+const float MuonMass = 0.10565837;
+const float KaonMass = 0.493677;
+const float PionMass = 0.139570;
 
-int main(int argc, char *argv[]){
+int main(int argc, char **argv){
 
   if(argc < 2) {
     std::cout << " Missing arguments " << std::endl;
     return -1;
   }
-  int isEleFinalState = atoi(argv[1]);
+  int isEleFinalState = -1;
   std::string dataset = "-1";
   std::string BPHRun = "-1";
+  std::string typeSelection = "-1";
+  std::string ntupleList = "-1";
+  std::string JOBid = "-1";
+  std::string outputFolder = "-1";
   int nMaxEvents = -1;
   int saveOUTntu = 0;
-  if(argc > 2) dataset = argv[2];
-  if(argc > 3) BPHRun = argv[3];
-  if(argc > 4) nMaxEvents = atoi(argv[4]);
-  if(argc > 5) saveOUTntu = atoi(argv[5]);
+  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "--isEle") {
+      if (i + 1 < argc) {
+	isEleFinalState = atoi(argv[i+1]);
+	break;
+      } else {
+	std::cerr << " --isEle option requires one argument " << std::endl;
+	return 1;
+      }
+    }
+  }  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "--dataset") {
+      if (i + 1 < argc) {
+        dataset = argv[i+1];
+        break;
+      } else {
+	std::cerr << " --dataset option requires one argument " << std::endl;
+        return 1;
+      }
+    }
+  }  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "--run") {
+      if (i + 1 < argc) {
+        BPHRun = argv[i+1];
+        break;
+      } else {
+	std::cerr << " --run option requires one argument " << std::endl;
+        return 1;
+      }
+    }
+  }  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "--typeSelection") {
+      if (i + 1 < argc) {
+        typeSelection = argv[i+1];
+        break;
+      } else {
+	std::cerr << " --typeSelection option requires one argument " << std::endl;
+        return 1;
+      }
+    }
+  }  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "--ntupleList") {
+      if (i + 1 < argc) {
+        ntupleList = argv[i+1];
+        break;
+      } else {
+	std::cerr << " --ntupleList option requires one argument " << std::endl;
+        return 1;
+      }
+    }
+  }  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "--JOBid") {
+      if (i + 1 < argc) {
+        JOBid = argv[i+1];
+        break;
+      } else {
+	std::cerr << " --JOBid option requires one argument " << std::endl;
+        return 1;
+      }
+    }
+  }  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "--outputFolder") {
+      if (i + 1 < argc) {
+        outputFolder = argv[i+1];
+        break;
+      } else {
+	std::cerr << " --outputFolder option requires one argument " << std::endl;
+        return 1;
+      }
+    }
+  }  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "--nMaxEvents") {
+      if (i + 1 < argc) {
+        nMaxEvents = atoi(argv[i+1]);
+        break;
+      } else {
+	std::cerr << " --nMaxEvents option requires one argument " << std::endl;
+        return 1;
+      }
+    }
+  }  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "--saveSelectedNTU") {
+      if (i + 1 < argc) {
+        saveOUTntu = atoi(argv[i+1]);
+        break;
+      } else {
+	std::cerr << " --saveSelectedNTU option requires one argument " << std::endl;
+        return 1;
+      }
+    }
+  }
 
 
-  std::cout << " isEleFinalState = " << isEleFinalState << " dataset = " << dataset << " BPHRun = " << BPHRun << " nMaxEvents = " << nMaxEvents << " saveOUTntu = " << saveOUTntu << std::endl;
+  if(ntupleList != "-1" && (JOBid == "-1" || outputFolder == "-1")){
+    std::cout << " configuration ERROR => splitting file based but missing JOBid and output folder " << std::endl;
+    return -1;
+  }
+
+  if(saveOUTntu != 0 && outputFolder == "-1"){
+    std::cout << " configuration ERROR => missing output folder for final trees " << std::endl;
+    return -1;
+  }
+
+  std::cout << " isEleFinalState = " << isEleFinalState << " dataset = " << dataset << " BPHRun = " << BPHRun << " typeSelection = " << typeSelection
+	    << " ntupleList = " << ntupleList << " JOBid = " << JOBid << " outputFolder = " << outputFolder
+	    << " nMaxEvents = " << nMaxEvents << " saveOUTntu = " << saveOUTntu << std::endl;
 
 
   gROOT->Reset();
@@ -103,18 +207,47 @@ int main(int argc, char *argv[]){
     }
   }
   else{
-    if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking1_2018A_18_08_14_new/*root");
-    if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking2_2018A_18_08_14_new/*root");
-    if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking3_2018A_18_08_14_new/*root");
-    if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking4_2018A_18_08_14_new/*root");
-    if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking5_2018A_18_08_14_new/*root");
-    if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking6_2018A_18_08_14_new/*root");
+    //round1 ntuples
+    // if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking1_2018A_18_08_14_new/*root");
+    // if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking2_2018A_18_08_14_new/*root");
+    // if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking3_2018A_18_08_14_new/*root");
+    // if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking4_2018A_18_08_14_new/*root");
+    // if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking5_2018A_18_08_14_new/*root");
+    // if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking6_2018A_18_08_14_new/*root");
 
-    if((dataset == "runB" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking1_2018B_18_08_14_new/*root");
-    if((dataset == "runB" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking2_2018B_18_08_14_new/*root");
-    if((dataset == "runB" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking3_2018B_18_08_14_new/*root");
-    if((dataset == "runB" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking4_2018B_18_08_14_new/*root");
-    if((dataset == "runB" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking5_2018B_18_08_14_new/*root");
+    // if((dataset == "runB" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking1_2018B_18_08_14_new/*root");
+    // if((dataset == "runB" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking2_2018B_18_08_14_new/*root");
+    // if((dataset == "runB" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking3_2018B_18_08_14_new/*root");
+    // if((dataset == "runB" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking4_2018B_18_08_14_new/*root");
+    // if((dataset == "runB" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking5_2018B_18_08_14_new/*root");
+
+    //need update wrt new production => check https://docs.google.com/spreadsheets/d/1Kdtaw0nGNXZ_O5-e7DR5WGOI0AOpUhccMfn4WIieGYU/edit#gid=0
+    if(ntupleList == "-1"){
+      if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH1_NN/*root");
+      if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH2_NN/*root");
+      if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH3_NN/*root");
+      if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH4_NN/*root");
+      if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH5_NN/*root");
+      if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH6_NN/*root");
+
+      if((dataset == "runB" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH1_NN/*root");
+      if((dataset == "runB" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH2_NN/*root");
+      if((dataset == "runB" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH3_NN/*root");
+      if((dataset == "runB" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH4_NN/*root");
+      if((dataset == "runB" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH5_NN/*root");
+    }
+
+    if(ntupleList != "-1"){
+      std::string rootFileName;
+      std::ifstream inFileLong;
+      inFileLong.open(ntupleList.c_str(), std::ios::in);
+      while(!inFileLong.eof()){
+	if(inFileLong >> rootFileName){
+	  t1->Add(rootFileName.c_str());
+	  std::cout << " adding " << rootFileName << std::endl;
+	}
+      }
+    }
 
     if(dataset == "MC" && BPHRun == "nnResonant"){
       t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BToKmumu_18_08_14_new/*root");
@@ -127,8 +260,10 @@ int main(int argc, char *argv[]){
   int nEvts = t1->GetEntries();
   std::cout << " #initial n. events: " << nEvts << std::endl;
 
-  std::string outNtuName = "/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kee_"+dataset+"_BPHRun"+BPHRun+".root";
-  if(!isEleFinalState) outNtuName = "/vols/cms/amartell/BParking/data_allStat/selectedEvents_Kmumu_"+dataset+"_BPHRun"+BPHRun+".root";
+  std::string outNtuName = outputFolder+"/selectedEvents_Kee_"+dataset+"_BPHRun"+BPHRun;
+  if(!isEleFinalState) outNtuName = outputFolder+"/selectedEvents_Kmumu_"+dataset+"_BPHRun"+BPHRun;
+  if(JOBid != "-1") outNtuName += "_JOB_"+JOBid;
+  outNtuName += ".root";
   gROOT->cd();
   TFile* newFile;
   TTree* newT;
@@ -167,6 +302,8 @@ int main(int argc, char *argv[]){
   Float_t Kll_lep2_dxy;
   Float_t Kll_lep1_dz;
   Float_t Kll_lep2_dz;
+  Float_t Kll_kaon_dxy;
+  Float_t Kll_kaon_dz;
 
   if(saveOUTntu){
     newFile = new TFile(outNtuName.c_str(),"recreate");
@@ -205,6 +342,8 @@ int main(int argc, char *argv[]){
     newT->Branch("Kll_lep2_dxy", &Kll_lep2_dxy, "Kll_lep2_dxy/F");
     newT->Branch("Kll_lep1_dz", &Kll_lep1_dz, "Kll_lep1_dz/F");
     newT->Branch("Kll_lep2_dz", &Kll_lep2_dz, "Kll_lep2_dz/F");
+    newT->Branch("Kll_kaon_dxy", &Kll_kaon_dxy, "Kll_kaon_dxy/F");
+    newT->Branch("Kll_kaon_dz", &Kll_kaon_dz, "Kll_kaon_dz/F");
   }
 
   std::cout << " >>> qui ok " << std::endl;
@@ -213,6 +352,7 @@ int main(int argc, char *argv[]){
   UInt_t lumi = 0;
   ULong64_t event = 0;
 
+  float nnBMX = -1;
   int MuonTag_index = -1;
   int MuonRecoTag_index = -1;
   int BToKll_sel_index = -1;
@@ -223,6 +363,7 @@ int main(int argc, char *argv[]){
   float BToKll_lep2_charge[kBToKllMax];
   int BToKll_lep1_index[kBToKllMax];
   int BToKll_lep2_index[kBToKllMax];
+  int BToKll_kaon_index[kBToKllMax];
   float BToKll_cosAlpha[kBToKllMax];
   float BToKll_CL_vtx[kBToKllMax];
   float BToKll_kaon_DCASig[kBToKllMax];
@@ -252,7 +393,18 @@ int main(int argc, char *argv[]){
   int Lepton_charge[kMuonMax];
   float Lepton_dxy[kMuonMax];
   float Lepton_dz[kMuonMax];
-
+  float PFCand_pt[kPFCandMax];
+  float PFCand_eta[kPFCandMax];
+  float PFCand_phi[kPFCandMax];
+  float PFCand_mass[kPFCandMax];
+  float PFCand_dxy[kPFCandMax];
+  float PFCand_dz[kPFCandMax];
+  float GenPart_pt[kGenPartMax];
+  float GenPart_eta[kGenPartMax];
+  float GenPart_phi[kGenPartMax];
+  int GenPart_KFromB_index = -1;
+  float BToKll_gen_mass[kBToKllMax];
+  float BToKll_gen_llMass[kBToKllMax];
   
   t1->SetBranchStatus("*", 0);
 
@@ -266,16 +418,23 @@ int main(int argc, char *argv[]){
     t1->SetBranchStatus("BToKee_sel_index", 1);          t1->SetBranchAddress("BToKee_sel_index", &BToKll_sel_index);
     if(dataset == "MC"){
       t1->SetBranchStatus("BToKee_gen_index", 1);          t1->SetBranchAddress("BToKee_gen_index", &BToKll_gen_index);
+      t1->SetBranchStatus("GenPart_KFromB_index", 1);      t1->SetBranchAddress("GenPart_KFromB_index", &GenPart_KFromB_index);
+      t1->SetBranchStatus("GenPart_pt", 1);                t1->SetBranchAddress("GenPart_pt", &GenPart_pt);
+      t1->SetBranchStatus("GenPart_eta", 1);               t1->SetBranchAddress("GenPart_eta", &GenPart_eta);
+      t1->SetBranchStatus("GenPart_phi", 1);               t1->SetBranchAddress("GenPart_phi", &GenPart_phi);
+      t1->SetBranchStatus("BToKee_gen_mass", 1);           t1->SetBranchAddress("BToKee_gen_mass", &BToKll_gen_mass);
+      t1->SetBranchStatus("BToKee_gen_eeMass", 1);         t1->SetBranchAddress("BToKee_gen_eeMass", &BToKll_gen_llMass);
     }
     t1->SetBranchStatus("BToKee_ele1_charge", 1);        t1->SetBranchAddress("BToKee_ele1_charge", &BToKll_lep1_charge);
     t1->SetBranchStatus("BToKee_ele2_charge", 1);        t1->SetBranchAddress("BToKee_ele2_charge", &BToKll_lep2_charge);
     t1->SetBranchStatus("BToKee_ele1_index", 1);         t1->SetBranchAddress("BToKee_ele1_index", &BToKll_lep1_index);
     t1->SetBranchStatus("BToKee_ele2_index", 1);         t1->SetBranchAddress("BToKee_ele2_index", &BToKll_lep2_index);
+    t1->SetBranchStatus("BToKee_kaon_index", 1);         t1->SetBranchAddress("BToKee_kaon_index", &BToKll_kaon_index);
     t1->SetBranchStatus("BToKee_cosAlpha", 1);           t1->SetBranchAddress("BToKee_cosAlpha", &BToKll_cosAlpha);
     t1->SetBranchStatus("BToKee_CL_vtx", 1);             t1->SetBranchAddress("BToKee_CL_vtx", &BToKll_CL_vtx);
     t1->SetBranchStatus("BToKee_kaon_DCASig", 1);        t1->SetBranchAddress("BToKee_kaon_DCASig", &BToKll_kaon_DCASig);
     t1->SetBranchStatus("BToKee_Lxy", 1);                t1->SetBranchAddress("BToKee_Lxy", &BToKll_Lxy);
-    t1->SetBranchStatus("BToKee_ctxy", 1);                t1->SetBranchAddress("BToKee_ctxy", &BToKll_ctxy);
+    t1->SetBranchStatus("BToKee_ctxy", 1);               t1->SetBranchAddress("BToKee_ctxy", &BToKll_ctxy);
     t1->SetBranchStatus("BToKee_eeKFit_ee_mass", 1);     t1->SetBranchAddress("BToKee_eeKFit_ee_mass", &BToKll_llKFit_ll_mass);
     t1->SetBranchStatus("BToKee_ee_mass", 1);            t1->SetBranchAddress("BToKee_ee_mass", &BToKll_ll_mass);
     t1->SetBranchStatus("BToKee_eeRefit", 1);            t1->SetBranchAddress("BToKee_eeRefit", &passed_2trk);
@@ -293,13 +452,18 @@ int main(int argc, char *argv[]){
     t1->SetBranchStatus("BToKee_ele2_phi", 1);            t1->SetBranchAddress("BToKee_ele2_phi", &BToKll_lep2_phi);
     t1->SetBranchStatus("Electron_pfRelIso03_all", 1);    t1->SetBranchAddress("Electron_pfRelIso03_all", &Lepton_pfRelIso03);
     t1->SetBranchStatus("Electron_pt", 1);                t1->SetBranchAddress("Electron_pt", &Lepton_pt);
-    t1->SetBranchStatus("Electron_eta", 1);                t1->SetBranchAddress("Electron_eta", &Lepton_eta);
-    t1->SetBranchStatus("Electron_phi", 1);                t1->SetBranchAddress("Electron_phi", &Lepton_phi);
-    t1->SetBranchStatus("Electron_mass", 1);                t1->SetBranchAddress("Electron_mass", &Lepton_mass);
-    t1->SetBranchStatus("Electron_charge", 1);             t1->SetBranchAddress("Electron_charge", &Lepton_charge);
-    t1->SetBranchStatus("Electron_dxy", 1);                t1->SetBranchAddress("Electron_dxy", &Lepton_dxy);
+    t1->SetBranchStatus("Electron_eta", 1);               t1->SetBranchAddress("Electron_eta", &Lepton_eta);
+    t1->SetBranchStatus("Electron_phi", 1);               t1->SetBranchAddress("Electron_phi", &Lepton_phi);
+    t1->SetBranchStatus("Electron_mass", 1);              t1->SetBranchAddress("Electron_mass", &Lepton_mass);
+    t1->SetBranchStatus("Electron_charge", 1);            t1->SetBranchAddress("Electron_charge", &Lepton_charge);
+    t1->SetBranchStatus("Electron_dxy", 1);               t1->SetBranchAddress("Electron_dxy", &Lepton_dxy);
     t1->SetBranchStatus("Electron_dz", 1);                t1->SetBranchAddress("Electron_dz", &Lepton_dz);
-
+    t1->SetBranchStatus("PFCand_pt", 1);                  t1->SetBranchAddress("PFCand_pt", &PFCand_pt);
+    t1->SetBranchStatus("PFCand_eta", 1);                 t1->SetBranchAddress("PFCand_eta", &PFCand_eta);
+    t1->SetBranchStatus("PFCand_phi", 1);                 t1->SetBranchAddress("PFCand_phi", &PFCand_phi);
+    t1->SetBranchStatus("PFCand_mass", 1);                t1->SetBranchAddress("PFCand_mass", &PFCand_mass);
+    t1->SetBranchStatus("PFCand_dxy", 1);                 t1->SetBranchAddress("PFCand_dxy", &PFCand_dxy);
+    t1->SetBranchStatus("PFCand_dz", 1);                  t1->SetBranchAddress("PFCand_dz", &PFCand_dz);
   }
   else{
     t1->SetBranchStatus("Muon_probe_index", 1);            t1->SetBranchAddress("Muon_probe_index", &MuonTag_index);
@@ -307,13 +471,23 @@ int main(int argc, char *argv[]){
     t1->SetBranchStatus("Muon_softId", 1);                 t1->SetBranchAddress("Muon_softId", &Lepton_softId);
     t1->SetBranchStatus("Muon_mediumId", 1);               t1->SetBranchAddress("Muon_mediumId", &Lepton_mediumId);
     t1->SetBranchStatus("BToKmumu_sel_index", 1);          t1->SetBranchAddress("BToKmumu_sel_index", &BToKll_sel_index);
+    if(typeSelection == "NN_BkgR" || typeSelection == "NN_SigEff"){
+      t1->SetBranchStatus("nnBMX", 1);                      t1->SetBranchAddress("nnBMX", &nnBMX);
+    }
     if(dataset == "MC"){
       t1->SetBranchStatus("BToKmumu_gen_index", 1);          t1->SetBranchAddress("BToKmumu_gen_index", &BToKll_gen_index);
+      t1->SetBranchStatus("GenPart_KFromB_index", 1);      t1->SetBranchAddress("GenPart_KFromB_index", &GenPart_KFromB_index);
+      t1->SetBranchStatus("GenPart_pt", 1);                t1->SetBranchAddress("GenPart_pt", &GenPart_pt);
+      t1->SetBranchStatus("GenPart_eta", 1);               t1->SetBranchAddress("GenPart_eta", &GenPart_eta);
+      t1->SetBranchStatus("GenPart_phi", 1);               t1->SetBranchAddress("GenPart_phi", &GenPart_phi);
+      t1->SetBranchStatus("BToKmumu_gen_mass", 1);         t1->SetBranchAddress("BToKmumu_gen_mass", BToKll_gen_mass);
+      t1->SetBranchStatus("BToKmumu_gen_mumuMass", 1);     t1->SetBranchAddress("BToKmumu_gen_mumuMass", BToKll_gen_llMass);
     }
     t1->SetBranchStatus("BToKmumu_mu1_charge", 1);         t1->SetBranchAddress("BToKmumu_mu1_charge", &BToKll_lep1_charge);
     t1->SetBranchStatus("BToKmumu_mu2_charge", 1);         t1->SetBranchAddress("BToKmumu_mu2_charge", &BToKll_lep2_charge);
     t1->SetBranchStatus("BToKmumu_mu1_index", 1);         t1->SetBranchAddress("BToKmumu_mu1_index", &BToKll_lep1_index);
     t1->SetBranchStatus("BToKmumu_mu2_index", 1);         t1->SetBranchAddress("BToKmumu_mu2_index", &BToKll_lep2_index);
+    t1->SetBranchStatus("BToKmumu_kaon_index", 1);         t1->SetBranchAddress("BToKmumu_kaon_index", &BToKll_kaon_index);
     t1->SetBranchStatus("BToKmumu_cosAlpha", 1);           t1->SetBranchAddress("BToKmumu_cosAlpha", &BToKll_cosAlpha);
     t1->SetBranchStatus("BToKmumu_CL_vtx", 1);             t1->SetBranchAddress("BToKmumu_CL_vtx", &BToKll_CL_vtx);
     t1->SetBranchStatus("BToKmumu_kaon_DCASig", 1);        t1->SetBranchAddress("BToKmumu_kaon_DCASig", &BToKll_kaon_DCASig);
@@ -343,7 +517,12 @@ int main(int argc, char *argv[]){
     t1->SetBranchStatus("Muon_charge", 1);                 t1->SetBranchAddress("Muon_charge", &Lepton_charge);
     t1->SetBranchStatus("Muon_dxy", 1);                    t1->SetBranchAddress("Muon_dxy", &Lepton_dxy);
     t1->SetBranchStatus("Muon_dz", 1);                     t1->SetBranchAddress("Muon_dz", &Lepton_dz);
-
+    t1->SetBranchStatus("PFCand_pt", 1);                t1->SetBranchAddress("PFCand_pt", &PFCand_pt);
+    t1->SetBranchStatus("PFCand_eta", 1);                t1->SetBranchAddress("PFCand_eta", &PFCand_eta);
+    t1->SetBranchStatus("PFCand_phi", 1);                t1->SetBranchAddress("PFCand_phi", &PFCand_phi);
+    t1->SetBranchStatus("PFCand_mass", 1);                t1->SetBranchAddress("PFCand_mass", &PFCand_mass);
+    t1->SetBranchStatus("PFCand_dxy", 1);                t1->SetBranchAddress("PFCand_dxy", &PFCand_dxy);
+    t1->SetBranchStatus("PFCand_dz", 1);                t1->SetBranchAddress("PFCand_dz", &PFCand_dz);
   }
 
 
@@ -353,36 +532,38 @@ int main(int argc, char *argv[]){
   llMassBoundary.push_back(1.);
   llMassBoundary.push_back(2.5);
   llMassBoundary.push_back(2.9);
-  llMassBoundary.push_back(3.2);
+  llMassBoundary.push_back(3.3);
   llMassBoundary.push_back(3.58);
+  llMassBoundary.push_back(100.);
 
 
-
-  std::string outName = "outMassHistos_Kee_"+dataset+"_BPHRun"+BPHRun+".root";
-  if(!isEleFinalState) outName = "outMassHistos_Kmumu_"+dataset+"_BPHRun"+BPHRun+".root";
+  std::string outName = "outMassHistos_Kee_"+dataset+"_BPHRun"+BPHRun;
+  if(!isEleFinalState) outName = "outMassHistos_Kmumu_"+dataset+"_BPHRun"+BPHRun;
+  if(JOBid != "-1") outName = outputFolder + "/" +outName + "_JOB_"+JOBid;
+  outName += ".root";
   TFile outMassHistos(outName.c_str(), "recreate");
 
   ///histos: 1 per bin plus inclusive
-  TH1F* hAlpha[6];
-  TH1F* hCLVtx[6];
-  TH1F* hDCASig[6];
-  TH1F* hLxy[6];
-  TH1F* hctxy[6];
-  TH1F* hKaonpt[6];
-  TH1F* hLep1pt[6];
-  TH1F* hLep2pt[6];
-  TH1F* hLep1pt_EB[6];
-  TH1F* hLep2pt_EB[6];
-  TH1F* hLep1pt_EE[6];
-  TH1F* hLep2pt_EE[6];
-  TH1F* hBpt[6];
-  TH1F* hllMass[6];
-  TH1F* hllRefitMass[6];
-  TH1F* hllPrefitMass[6];
-  TH2F* hllMass_vs_Bmass[6];
-  TH1F* hBmass[6];
+  TH1F* hAlpha[7];
+  TH1F* hCLVtx[7];
+  TH1F* hDCASig[7];
+  TH1F* hLxy[7];
+  TH1F* hctxy[7];
+  TH1F* hKaonpt[7];
+  TH1F* hLep1pt[7];
+  TH1F* hLep2pt[7];
+  TH1F* hLep1pt_EB[7];
+  TH1F* hLep2pt_EB[7];
+  TH1F* hLep1pt_EE[7];
+  TH1F* hLep2pt_EE[7];
+  TH1F* hBpt[7];
+  TH1F* hllMass[7];
+  TH1F* hllRefitMass[7];
+  TH1F* hllPrefitMass[7];
+  TH2F* hllMass_vs_Bmass[7];
+  TH1F* hBmass[7];
 
-  for(int ij=0; ij<6; ++ij){
+  for(int ij=0; ij<7; ++ij){
     hAlpha[ij] = new TH1F(Form("hAlpha_bin%d", ij), "", 500, 0, 1.1);
     hAlpha[ij]->Sumw2();
     hAlpha[ij]->SetLineColor(kRed);
@@ -477,15 +658,14 @@ int main(int argc, char *argv[]){
   }
 
 
-  float nEv_muonTag[5] = {0.};
-  float nEv_recoCand[5] = {0.};
-  float nEv_chargeEff[5] = {0.};
-  float nEv_alphaEff[5] = {0.};
-  float nEv_vtxCLEff[5] = {0.};
-  float nEv_LxyEff[5] = {0.};
+  float nEv_muonTag[1] = {0.};
+  float nEv_recoCand[1] = {0.};
+  float nEv_chargeSel[1] = {0.};
+  // float nEv_alphaEff[1] = {0.};
+  // float nEv_vtxCLEff[1] = {0.};
+  // float nEv_LxyEff[1] = {0.};
+  float nEv_selected[7] = {0.};
 
-  int nEvents_hm_5p6 = 0;
-  int nEvents_hm_5p7 = 0;
 
   if(nMaxEvents == -1) nMaxEvents = nEvts;
   for(int iEvt = 0; iEvt<nMaxEvents; ++iEvt){
@@ -508,8 +688,9 @@ int main(int argc, char *argv[]){
     // 			    Lepton_mediumId[BToKll_lep2_index[BToKll_sel_index]] != 1)) continue;
  
 
+    //opposite sign leptons
     if(BToKll_lep1_charge[BToKll_sel_index]*BToKll_lep2_charge[BToKll_sel_index] > 0.) continue;
-
+    ++nEv_chargeSel[0];
 
     float llInvPrefitMass = 0.;
     if(isEleFinalState){
@@ -544,21 +725,35 @@ int main(int argc, char *argv[]){
       }
     }
 
+    //to synch. with Riccardo ~ tight selection
+    if(typeSelection == "tighCB"){
+      if((BToKll_kaon_pt[BToKll_sel_index] < 1.5 || BToKll_pt[BToKll_sel_index] < 10.)) continue;
+      if(BToKll_cosAlpha[BToKll_sel_index] < 0.999) continue;
+      if(BToKll_CL_vtx[BToKll_sel_index] < 0.1) continue;
+      if(BToKll_Lxy[BToKll_sel_index] < 6.) continue;
+    }
+
+    // MVA selection to get same background rejection as with the cut base
+    if(typeSelection == "NN_BkgR" && nnBMX < 0.993) continue;
+
+    // MVA selection to get same signal efficiency as with the cut base
+    if(typeSelection == "NN_SigEff" && nnBMX < 0.998) continue;
 
 
-    if(dataset == "MC" || BToKll_mass[BToKll_sel_index] > 5.7){
-      ++nEvents_hm_5p7;
+    if(massBin != -1) ++nEv_selected[massBin];
+    else ++nEv_selected[6];
 
+    //save output ntuple with selected events fro final plots
       if(saveOUTntu){
 	Kll_cosAlpha = BToKll_cosAlpha[BToKll_sel_index];
 	Kll_CL_vtx = BToKll_CL_vtx[BToKll_sel_index];
 	Kll_kaon_DCASig = BToKll_kaon_DCASig[BToKll_sel_index];
 	Kll_Lxy = BToKll_Lxy[BToKll_sel_index];
 	Kll_ctxy = BToKll_ctxy[BToKll_sel_index];
-	Kll_llmass = BToKll_ll_mass[BToKll_sel_index];
+	Kll_llmass = massVar;
 	Kll_llRefitmass = llInvRefitMass;
 	Kll_llPrefitmass = llInvPrefitMass;
-	Kll_mass = llInvMass;
+	Kll_mass = BToKll_mass[BToKll_sel_index];
 	Kll_pt = BToKll_pt[BToKll_sel_index];
 	Kll_kaon_pt = BToKll_kaon_pt[BToKll_sel_index];
 	Kll_kaon_eta = BToKll_kaon_eta[BToKll_sel_index];
@@ -591,26 +786,15 @@ int main(int argc, char *argv[]){
 	Kll_lep2_dxy = Lepton_dxy[BToKll_lep2_index[BToKll_sel_index]];
 	Kll_lep1_dz = Lepton_dz[BToKll_lep1_index[BToKll_sel_index]];
 	Kll_lep2_dz = Lepton_dz[BToKll_lep2_index[BToKll_sel_index]];
+	Kll_kaon_dxy = PFCand_dxy[BToKll_kaon_index[BToKll_sel_index]];
+	Kll_kaon_dz = PFCand_dz[BToKll_kaon_index[BToKll_sel_index]];
 
 	newT->Fill();
       }
-    }
-
-    if(massBin != -1) ++nEv_chargeEff[massBin];
-
-    if((BToKll_kaon_pt[BToKll_sel_index] < 1.5 || BToKll_pt[BToKll_sel_index] < 10.)) continue;
-
-    if(BToKll_cosAlpha[BToKll_sel_index] < 0.999) continue;
-    //if(BToKll_cosAlpha[BToKll_sel_index] < 0.99) continue;
-
-    if(massBin != -1) ++nEv_alphaEff[massBin];
-    if(BToKll_CL_vtx[BToKll_sel_index] < 0.1) continue;
-    if(massBin != -1) ++nEv_vtxCLEff[massBin];    
-    if(BToKll_Lxy[BToKll_sel_index] < 6.) continue;
-    if(massBin != -1) ++nEv_LxyEff[massBin];
+      //end output Nutuple
 
 
-
+    //histograms for each mass bin
     if(massBin != -1){
       hAlpha[massBin]->Fill(BToKll_cosAlpha[BToKll_sel_index]);
       hCLVtx[massBin]->Fill(BToKll_CL_vtx[BToKll_sel_index]);
@@ -634,29 +818,32 @@ int main(int argc, char *argv[]){
       hBmass[massBin]->Fill(BToKll_mass[BToKll_sel_index]);
     }
     
-    hllPrefitMass[5]->Fill(llInvPrefitMass);
-    hllRefitMass[5]->Fill(llInvRefitMass);
-    hllMass[5]->Fill(llInvMass);
-    hllMass_vs_Bmass[5]->Fill(BToKll_mass[BToKll_sel_index], llInvPrefitMass);
-    hBmass[5]->Fill(BToKll_mass[BToKll_sel_index]);
+    //histograms inclusive over all m(ll)
+    hllPrefitMass[6]->Fill(llInvPrefitMass);
+    hllRefitMass[6]->Fill(llInvRefitMass);
+    hllMass[6]->Fill(llInvMass);
+    hllMass_vs_Bmass[6]->Fill(BToKll_mass[BToKll_sel_index], llInvPrefitMass);
+    hBmass[6]->Fill(BToKll_mass[BToKll_sel_index]);
     
-    hAlpha[5]->Fill(BToKll_cosAlpha[BToKll_sel_index]);
-    hCLVtx[5]->Fill(BToKll_CL_vtx[BToKll_sel_index]);
-    hDCASig[5]->Fill(BToKll_kaon_DCASig[BToKll_sel_index]);
-    hLxy[5]->Fill(BToKll_Lxy[BToKll_sel_index]);
-    hctxy[5]->Fill(BToKll_ctxy[BToKll_sel_index]);
-    hKaonpt[5]->Fill(BToKll_kaon_pt[BToKll_sel_index]);
-    hBpt[5]->Fill(BToKll_pt[BToKll_sel_index]);
+    hAlpha[6]->Fill(BToKll_cosAlpha[BToKll_sel_index]);
+    hCLVtx[6]->Fill(BToKll_CL_vtx[BToKll_sel_index]);
+    hDCASig[6]->Fill(BToKll_kaon_DCASig[BToKll_sel_index]);
+    hLxy[6]->Fill(BToKll_Lxy[BToKll_sel_index]);
+    hctxy[6]->Fill(BToKll_ctxy[BToKll_sel_index]);
+    hKaonpt[6]->Fill(BToKll_kaon_pt[BToKll_sel_index]);
+    hBpt[6]->Fill(BToKll_pt[BToKll_sel_index]);
 
-    hLep1pt[5]->Fill(BToKll_lep1_pt[BToKll_sel_index]);
-    hLep2pt[5]->Fill(BToKll_lep2_pt[BToKll_sel_index]);      
-    if(std::abs(BToKll_lep1_eta[BToKll_sel_index]) < 1.47) hLep1pt_EB[5]->Fill(BToKll_lep1_pt[BToKll_sel_index]);
-    else hLep1pt_EE[5]->Fill(BToKll_lep1_pt[BToKll_sel_index]);
-    if(std::abs(BToKll_lep2_eta[BToKll_sel_index]) < 1.47) hLep2pt_EB[5]->Fill(BToKll_lep2_pt[BToKll_sel_index]);
-    else hLep2pt_EE[5]->Fill(BToKll_lep2_pt[BToKll_sel_index]);
+    hLep1pt[6]->Fill(BToKll_lep1_pt[BToKll_sel_index]);
+    hLep2pt[6]->Fill(BToKll_lep2_pt[BToKll_sel_index]);
+    if(std::abs(BToKll_lep1_eta[BToKll_sel_index]) < 1.47) hLep1pt_EB[6]->Fill(BToKll_lep1_pt[BToKll_sel_index]);
+    else hLep1pt_EE[6]->Fill(BToKll_lep1_pt[BToKll_sel_index]);
+    if(std::abs(BToKll_lep2_eta[BToKll_sel_index]) < 1.47) hLep2pt_EB[6]->Fill(BToKll_lep2_pt[BToKll_sel_index]);
+    else hLep2pt_EE[6]->Fill(BToKll_lep2_pt[BToKll_sel_index]);
 
+    /*
     if(massBin == 3 && BToKll_mass[BToKll_sel_index] < 6.)
       std::cout << run << " " << lumi << " " << event << std::endl;
+    */
   }//loop over events
 
   
@@ -666,14 +853,10 @@ int main(int argc, char *argv[]){
     newFile->Close(); 
   }
 
-  
-  // std::string outName = "outMassHistos_Kee_"+dataset+"_BPHRun"+BPHRun+".root";
-  // if(!isEleFinalState) outName = "outMassHistos_Kmumu_"+dataset+"_BPHRun"+BPHRun+".root";
-  // TFile outMassHistos(outName.c_str(), "recreate");
   outMassHistos.cd();
   
   std::cout << " ***** summary ***** "<< std::endl;
-  for(int ij=0; ij<6; ++ij){
+  for(int ij=0; ij<7; ++ij){
     hAlpha[ij]->Write(hAlpha[ij]->GetName());
     hCLVtx[ij]->Write(hCLVtx[ij]->GetName());
     hDCASig[ij]->Write(hDCASig[ij]->GetName());
@@ -696,220 +879,12 @@ int main(int argc, char *argv[]){
     hllMass_vs_Bmass[ij]->Write(hllMass_vs_Bmass[ij]->GetName());
     hBmass[ij]->Write(hBmass[ij]->GetName());
 
-    if(ij > 4) continue;
+    if(ij > 5) continue;
     std::cout << "\n massBin: " << llMassBoundary[ij] << " - " << llMassBoundary[ij+1]
-              << " \n \t recoEvts = " << nEv_chargeEff[ij] << " \t alphaCut = " << nEv_alphaEff[ij]
-	      << " \t vtxCLCut = " << nEv_vtxCLEff[ij] << " \t LxyCut = " << nEv_LxyEff[ij] << std::endl;
+	      << " \n \t muonTag = " << nEv_muonTag[0] << " \t recoEvts = " << nEv_recoCand[0]
+              << " \n \t chargeSel = " << nEv_chargeSel[0] << " \t selected Events = " << nEv_selected[ij] << std::endl;
 
   }
   outMassHistos.Close();
-
-  return 100;
-
-  TLegend *legM = new TLegend(0.70,0.70,0.98,0.95,NULL,"brNDC");
-  legM->SetTextFont(42);
-  legM->SetFillColor(kWhite);
-  legM->SetLineColor(kWhite);
-  legM->SetShadowColor(kWhite);
-  legM->SetFillStyle(0);
-  legM->SetTextSize(0.05);
-  legM->AddEntry(hAlpha[3], "DATA", "l");
-  
-
-  TCanvas* c1 = new TCanvas();
-  c1->cd();
-  gPad->SetLogy();
-  hAlpha[3]->GetXaxis()->SetTitle("cosAlpha");
-  hAlpha[3]->Draw("hist");
-  legM->Draw("same");
-  if(isEleFinalState){
-    c1->Print("plots/Kee_cosAlpha_DA.png", "png");
-    c1->Print("plots/Kee_cosAlpha_DA.pdf", "pdf");
-    c1->Print("plots/Kee_cosAlpha_DA.root", "root");
-  }
-  else{
-    c1->Print("plots/Kmumu_cosAlpha_DA.png", "png");
-    c1->Print("plots/Kmumu_cosAlpha_DA.pdf", "pdf");
-    c1->Print("plots/Kmumu_cosAlpha_DA.root", "root");
-  }
-
-  TCanvas* c1b = new TCanvas();
-  c1b->cd();
-  gPad->SetLogy();
-  hCLVtx[3]->GetXaxis()->SetTitle("CL_vtx");
-  hCLVtx[3]->Draw("hist");
-  legM->Draw("same");
-  if(isEleFinalState){
-    c1b->Print("plots/Kee_CL_vtx_DA.png", "png");
-    c1b->Print("plots/Kee_CL_vtx_DA.pdf", "pdf");
-    c1b->Print("plots/Kee_CL_vtx_DA.root", "root");
-  }
-  else{
-    c1b->Print("plots/Kmumu_CL_vtx_DA.png", "png");
-    c1b->Print("plots/Kmumu_CL_vtx_DA.pdf", "pdf");
-    c1b->Print("plots/Kmumu_CL_vtx_DA.root", "root");
-  }
-
-  TCanvas* c1c = new TCanvas();
-  hDCASig[3]->GetXaxis()->SetTitle("kaon DCA SIP");
-  hDCASig[3]->Draw("hist");
-  legM->Draw("same");
-  if(isEleFinalState){
-    c1c->Print("plots/Kee_kaonDCA_DA.png", "png");
-    c1c->Print("plots/Kee_kaonDCA_DA.pdf", "pdf");
-    c1c->Print("plots/Kee_kaonDCA_DA.root", "root");
-  }
-  else{
-    c1c->Print("plots/Kmumu_kaonDCA_DA.png", "png");
-    c1c->Print("plots/Kmumu_kaonDCA_DA.pdf", "pdf");
-    c1c->Print("plots/Kmumu_kaonDCA_DA.root", "root");
-  }
-  
-  TCanvas* c1d = new TCanvas();
-  gPad->SetLogy();
-  hLxy[3]->GetXaxis()->SetTitle("Lxy IP(cm)");
-  hLxy[3]->Draw("hist");
-  legM->Draw("same");
-  if(isEleFinalState){
-    c1d->Print("plots/Kee_Lxy_DA.png", "png");
-    c1d->Print("plots/Kee_Lxy_DA.pdf", "pdf");
-    c1d->Print("plots/Kee_Lxy_DA.root", "root");
-  }
-  else{
-    c1d->Print("plots/Kmumu_Lxy_DA.png", "png");
-    c1d->Print("plots/Kmumu_Lxy_DA.pdf", "pdf");
-    c1d->Print("plots/Kmumu_Lxy_DA.root", "root");
-  }
-
-  TCanvas* c1e = new TCanvas();
-  gPad->SetLogy();
-  if(isEleFinalState)
-    hllMass[3]->GetXaxis()->SetTitle("Mee mass");
-  else hllMass[3]->GetXaxis()->SetTitle("Mmumu mass");
-  hllMass[3]->Draw("hist");
-  legM->Draw("same");
-  if(isEleFinalState){
-    c1e->Print("plots/Kee_Mee_DA.png", "png");
-    c1e->Print("plots/Kee_Mee_DA.pdf", "pdf");
-    c1e->Print("plots/Kee_Mee_DA.root", "root");
-  }
-  else{
-    c1e->Print("plots/Kmumu_Mee_DA.png", "png");
-    c1e->Print("plots/Kmumu_Mee_DA.pdf", "pdf");
-    c1e->Print("plots/Kmumu_Mee_DA.root", "root");
-  }
-
-  TCanvas* c1f = new TCanvas();
-  if(isEleFinalState){
-    hllMass_vs_Bmass[3]->GetXaxis()->SetTitle("Kee mass");
-    hllMass_vs_Bmass[3]->GetYaxis()->SetTitle("ee mass");
-  }
-  else{
-    hllMass_vs_Bmass[3]->GetXaxis()->SetTitle("Kmumu mass");
-    hllMass_vs_Bmass[3]->GetYaxis()->SetTitle("mumu mass");
-  }
-  hllMass_vs_Bmass[3]->Draw("");
-  legM->Draw("same");
-  if(isEleFinalState){
-    c1f->Print("plots/Kee_Mee_vsBmass_DA.png", "png");
-    c1f->Print("plots/Kee_Mee_vsBmass_DA.pdf", "pdf");
-    c1f->Print("plots/Kee_Mee_vsBmass_DA.root", "root");
-  }
-  else{
-    c1f->Print("plots/Kmumu_Mmumu_vsBmass_DA.png", "png");
-    c1f->Print("plots/Kmumu_Mmumu_vsBmass_DA.pdf", "pdf");
-    c1f->Print("plots/Kmumu_Mmumu_vsBmass_DA.root", "root");
-  }
-
-  TCanvas* c1g = new TCanvas();
-  gPad->SetLogy();
-  if(isEleFinalState)  hBmass[3]->GetXaxis()->SetTitle("B(Kee) mass");
-  else hBmass[3]->GetXaxis()->SetTitle("B(Kmumu) mass");
-  hBmass[3]->Draw("hist");
-  legM->Draw("same");
-  if(isEleFinalState){
-    c1g->Print("plots/Kee_mass_DA.png", "png");
-    c1g->Print("plots/Kee_mass_DA.pdf", "pdf");
-    c1g->Print("plots/Kee_mass_DA.root", "root");
-  }
-  else{
-    c1g->Print("plots/Kmumu_mass_DA.png", "png");
-    c1g->Print("plots/Kmumu_mass_DA.pdf", "pdf");
-    c1g->Print("plots/Kmumu_mass_DA.root", "root");
-  }
-
-
-
-  //comment out for the moment
-  ///////////////////////////////////////////////////////////
-  //now fitting
-
-  RooMsgService::instance().setGlobalKillBelow(RooFit::WARNING);
-
-  float nEv_postFit[5] = {0.};
-  float nEvError_postFit[5] = {0.};
-
-  RooWorkspace w("w");
-  w.factory("x[0, 10]");
-  //w.factory("x[4.5, 6.]");                                                                                                                                           
-
-  w.factory("nbackground[10000, 0, 10000]");
-  w.factory("nsignal[100, 0.0, 10000.0]");
-
-  for(int ij=0; ij<5; ++ij){
-    //w.factory("Gaussian::smodel(x,mu[5.3,4.5,6],sigma[0.05,0,0.2])");                                                                                                
-    //w.factory("RooCBShape::smodel(x,m[5.3,4.5,6],s[0.1,0.,1.],a[1.2,0.,3.],n[1,0.1,6.])");
-    w.factory("RooCBShape::smodel(x,m[5.3,0.,10.],s[0.1,0.,1.],a[1.2,0.,3.],n[1,0.1,6.])");
-    //w.factory("RooCBShape::CBall(x[0,15], mean[11000,13000], sigma[5000,200000], alpha[0,10000],n[0,100000])");                                                      
-    RooAbsPdf * smodel = w.pdf("smodel");
-
-    w.factory("Exponential::bmodel(x,tau[-2,-3,0])");
-    RooAbsPdf * bmodel = w.pdf("bmodel");
-
-    w.factory("SUM::model(nbackground*bmodel, nsignal*smodel)");
-    RooAbsPdf * model = w.pdf("model");
-
-    RooDataHist hBMass("hBMass", "hBMass", *w.var("x"), Import(*(hBmass[ij])));
-
-    RooFitResult * r = model->fitTo(hBMass, Minimizer("Minuit2"),Save(true));
-
-    RooPlot * plot = w.var("x")->frame();
-    if(isEleFinalState){
-      plot->SetXTitle("Kee mass (GeV)");
-    }
-    else{
-      plot->SetXTitle("K#mu#mu mass (GeV)");
-    }
-    plot->SetTitle("");
-    plot->SetAxisRange(4.,6);
-    hBMass.plotOn(plot);
-    model->plotOn(plot);
-    model->plotOn(plot, Components("bmodel"),LineStyle(kDashed));
-    model->plotOn(plot, Components("smodel"),LineColor(kRed));
-
-    TCanvas * cc = new TCanvas();
-    cc->SetLogy(0);
-    plot->Draw();
-    if(isEleFinalState) cc->Print(Form("plots/Bmass_DATA/Kee_%s.png",hBmass[ij]->GetName()), "png");
-    else cc->Print(Form("plots/Bmass_DATA/Kmumu_%s.png",hBmass[ij]->GetName()), "png");
-
-    RooRealVar* parS = (RooRealVar*) r->floatParsFinal().find("nsignal");
-    RooRealVar* parB = (RooRealVar*) r->floatParsFinal().find("nbackground");
-    nEv_postFit[ij] = parS->getValV();
-    nEvError_postFit[ij] = parS->getError();
-
-    std::cout << " selection signal events = \t " << parS->getValV() << " error = " << parS->getError()
-              << " bkg events = " << parB->getValV() << " error = " << parB->getError() << std::endl;
-  }
-
-  std::cout << " ***** summary ***** "<< std::endl;
-  for(int ij=0; ij<5; ++ij){
-
-    std::cout << "\n category = " << hBmass[ij]->GetName()
-              << " \n \t recoEvts = " << nEv_LxyEff[ij] << " postFit " << nEv_postFit[ij] << "+/-" << nEvError_postFit[ij] << std::endl;
-  }
-
-
-  std::cout << " nEvents_hm_5p6 = " << nEvents_hm_5p6 << " nEvents_hm_5p7 " << nEvents_hm_5p7 << std::endl;
 
 }
