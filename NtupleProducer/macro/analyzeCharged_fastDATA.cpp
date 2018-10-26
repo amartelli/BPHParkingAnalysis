@@ -1,6 +1,6 @@
 //g++ -Wall -o analyzeCharged_fastDATA `root-config --cflags --glibs` -lRooFitCore analyzeCharged_fastDATA.cpp
 
-//./analyzeCharged_fastDATA --isEle (0,1) --dataset (-1, runA, runB, MC) --run (1,2,3,...) --typeSelection (tighCB, NN_BkgR, NN_SigEff) --ntupleList (list.txt) --JOBid (1,2..) --outputFolder ("outfolder") --nMaxEvents (-1, N) --saveSelectedNTU (1,0) --outSelectedNTU (path for selected ntuples)
+//./analyzeCharged_fastDATA --isEle (0,1) --dataset (-1, runA, runB, MC) --run (1,2,3,...) --typeSelection (tightCB, NN_BkgR, NN_SigEff) --ntupleList (list.txt) --JOBid (1,2..) --outputFolder ("outfolder") --nMaxEvents (-1, N) --saveSelectedNTU (1,0) --outSelectedNTU (path for selected ntuples)
 
 
 #include <iostream>
@@ -737,7 +737,7 @@ int main(int argc, char **argv){
     }
 
     //to synch. with Riccardo ~ tight selection
-    if(typeSelection == "tighCB"){
+    if(typeSelection == "tightCB"){
       if((BToKll_kaon_pt[BToKll_sel_index] < 1.5 || BToKll_pt[BToKll_sel_index] < 10.)) continue;
       if(BToKll_cosAlpha[BToKll_sel_index] < 0.999) continue;
       if(BToKll_CL_vtx[BToKll_sel_index] < 0.1) continue;
