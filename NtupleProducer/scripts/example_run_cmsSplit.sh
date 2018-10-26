@@ -7,4 +7,4 @@ python ~/cmsSplit.py --anType script --cfg config_data_runB.sh --tag BToKee_2018
 
 
 ##with input txt in case of simple script and JOBID needed as input
-python ~/cmsSplit.py --anType scriptAndJOBID --cfg config_runAnalyis.sh --tag BToKmumu_2018B_BPH4_NN_BkgR_OS --listquery -i list_ntuDATA_BToKmumu_2018B_BPH4.txt --filesperjob 1 --storeArea YOUR_OUTPUT_FOLDER
+python ~/cmsSplit.py --anType scriptAndJOBID --cfg config_runAnalyis.sh --tag BToKmumu_2018B_BPH4_NN_BkgR_OS --listquery -i list_ntuDATA_BToKmumu_2018B_BPH4.txt --filesperjob 20 --storeArea YOUR_OUTPUT_FOLDER
