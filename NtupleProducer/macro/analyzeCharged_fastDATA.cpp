@@ -1,6 +1,6 @@
 //g++ -Wall -o analyzeCharged_fastDATA `root-config --cflags --glibs` -lRooFitCore analyzeCharged_fastDATA.cpp
 
-//./analyzeCharged_fastDATA --isEle (0,1) --dataset (-1, runA, runB, MC) --run (1,2,3,...) --typeSelection (tighCB, NN_BkgR, NN_SigEff) --ntupleList (list.txt) --JOBid (1,2..) --outputFolder ("outfolder") --nMaxEvents (-1, N) --saveSelectedNTU (1,0)
+//./analyzeCharged_fastDATA --isEle (0,1) --dataset (-1, runA, runB, MC) --run (1,2,3,...) --typeSelection (tighCB, NN_BkgR, NN_SigEff) --ntupleList (list.txt) --JOBid (1,2..) --outputFolder ("outfolder") --nMaxEvents (-1, N) --saveSelectedNTU (1,0) --outSelectedNTU (path for selected ntuples)
 
 
 #include <iostream>
@@ -69,6 +69,7 @@ int main(int argc, char **argv){
   std::string outputFolder = "-1";
   int nMaxEvents = -1;
   int saveOUTntu = 0;
+  std::string outSelectedNTU = "-1";
   for (int i = 1; i < argc; ++i) {
     if(std::string(argv[i]) == "--isEle") {
       if (i + 1 < argc) {
@@ -159,6 +160,16 @@ int main(int argc, char **argv){
         return 1;
       }
     }
+  }  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "--outSelectedNTU") {
+      if (i + 1 < argc) {
+        outSelectedNTU = argv[i+1];
+        break;
+      } else {
+	std::cerr << " --outSelectedNTU option requires one argument " << std::endl;
+        return 1;
+      }
+    }
   }
 
 
@@ -167,14 +178,14 @@ int main(int argc, char **argv){
     return -1;
   }
 
-  if(saveOUTntu != 0 && outputFolder == "-1"){
+  if(saveOUTntu != 0 && outSelectedNTU == "-1"){
     std::cout << " configuration ERROR => missing output folder for final trees " << std::endl;
     return -1;
   }
 
   std::cout << " isEleFinalState = " << isEleFinalState << " dataset = " << dataset << " BPHRun = " << BPHRun << " typeSelection = " << typeSelection
 	    << " ntupleList = " << ntupleList << " JOBid = " << JOBid << " outputFolder = " << outputFolder
-	    << " nMaxEvents = " << nMaxEvents << " saveOUTntu = " << saveOUTntu << std::endl;
+	    << " nMaxEvents = " << nMaxEvents << " saveOUTntu = " << saveOUTntu << " outSelectedNTU = " << outSelectedNTU << std::endl;
 
 
   gROOT->Reset();
@@ -223,12 +234,12 @@ int main(int argc, char **argv){
 
     //need update wrt new production => check https://docs.google.com/spreadsheets/d/1Kdtaw0nGNXZ_O5-e7DR5WGOI0AOpUhccMfn4WIieGYU/edit#gid=0
     if(ntupleList == "-1"){
-      if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH1_NN/*root");
-      if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH2_NN/*root");
-      if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH3_NN/*root");
-      if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH4_NN/*root");
-      if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH5_NN/*root");
-      if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH6_NN/*root");
+      if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A1/*root");
+      if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A2/*root");
+      if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A3/*root");
+      if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A4/*root");
+      if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A5/*root");
+      if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A6/*root");
 
       if((dataset == "runB" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH1_NN/*root");
       if((dataset == "runB" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH2_NN/*root");
@@ -260,9 +271,9 @@ int main(int argc, char **argv){
   int nEvts = t1->GetEntries();
   std::cout << " #initial n. events: " << nEvts << std::endl;
 
-  std::string outNtuName = outputFolder+"/selectedEvents_Kee_"+dataset+"_BPHRun"+BPHRun;
-  if(!isEleFinalState) outNtuName = outputFolder+"/selectedEvents_Kmumu_"+dataset+"_BPHRun"+BPHRun;
-  if(JOBid != "-1") outNtuName += "_JOB_"+JOBid;
+  std::string outNtuName = "selectedEvents_Kee_"+dataset+"_BPHRun"+BPHRun;
+  if(!isEleFinalState) outNtuName = "selectedEvents_Kmumu_"+dataset+"_BPHRun"+BPHRun;
+  if(JOBid != "-1") outNtuName = outSelectedNTU+"/"+outNtuName+"_JOB_"+JOBid;
   outNtuName += ".root";
   gROOT->cd();
   TFile* newFile;
@@ -539,8 +550,8 @@ int main(int argc, char **argv){
 
   std::string outName = "outMassHistos_Kee_"+dataset+"_BPHRun"+BPHRun;
   if(!isEleFinalState) outName = "outMassHistos_Kmumu_"+dataset+"_BPHRun"+BPHRun;
-  if(JOBid != "-1") outName = outputFolder + "/" +outName + "_JOB_"+JOBid;
-  outName += ".root";
+  if(JOBid != "-1") outName = outputFolder; // + "/" +outName + "_JOB_"+JOBid;
+  else  outName += ".root";
   TFile outMassHistos(outName.c_str(), "recreate");
 
   ///histos: 1 per bin plus inclusive
