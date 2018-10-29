@@ -141,6 +141,7 @@ def submitProduction():
     f_template.close()
 
     currentDir = os.getcwd()
+    SCRAM_ARCH = os.getenv('SCRAM_ARCH')
 
     storeArea = opt.STOREAREA+'/'+opt.TAGNAME
     if not os.path.exists(storeArea):
@@ -208,6 +209,8 @@ def submitProduction():
             outScript = open(subDir+'/'+shFile,'w');
             outScript.write('#!/bin/sh \n');
             outScript.write('cd %s \n' %(subDir));
+            outScript.write('export %s \n' %(SCRAM_ARCH));
+            outScript.write('source /cvmfs/cms.cern.ch/cmsset_default.sh \n');    
             outScript.write('eval `scramv1 ru -sh` \n');
             outScript.write('export X509_USER_PROXY=~/myVoms/x509up_u1282033 \n');        
             outScript.write('cmsRun  %s \n' %(cfgfile) )
@@ -219,6 +222,8 @@ def submitProduction():
             outScript = open(subDir+'/'+shFile,'w');
             outScript.write('#!/bin/sh \n');
             outScript.write('cd %s \n' %(subDir));
+            outScript.write('export %s \n' %(SCRAM_ARCH));
+            outScript.write('source /cvmfs/cms.cern.ch/cmsset_default.sh \n');    
             outScript.write('eval `scramv1 ru -sh` \n');
             outScript.write('export X509_USER_PROXY=~/myVoms/x509up_u1282033 \n');
             outScript.write('source  %s \n' %(cfgfile) )
