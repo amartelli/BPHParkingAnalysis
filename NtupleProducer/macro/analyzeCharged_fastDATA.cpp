@@ -234,19 +234,12 @@ int main(int argc, char **argv){
 
     //need update wrt new production => check https://docs.google.com/spreadsheets/d/1Kdtaw0nGNXZ_O5-e7DR5WGOI0AOpUhccMfn4WIieGYU/edit#gid=0
     if(ntupleList == "-1"){
-      // if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A1/*root");
-      // if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A2/*root");
-      // if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A3/*root");
-      // if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A4/*root");
-      // if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A5/*root");
-      // if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A6/*root");
-
-      if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH1_NN/*root");
-      if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH2_NN/*root");
-      if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH3_NN/*root");
-      if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH4_NN/*root");
-      if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH5_NN/*root");
-      if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018A/BToKmumu_2018A_BPH5_NN/*root");
+      if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A1/*root");
+      if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A2/*root");
+      if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A3/*root");
+      if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A4/*root");
+      if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A5/*root");
+      if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A6/*root");
 
       if((dataset == "runB" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH1_NN/*root");
       if((dataset == "runB" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH2_NN/*root");
@@ -708,9 +701,6 @@ int main(int argc, char **argv){
 
     //opposite sign leptons
     if(BToKll_lep1_charge[BToKll_sel_index]*BToKll_lep2_charge[BToKll_sel_index] > 0.) continue;
-    //if(BToKll_lep1_charge[BToKll_sel_index]*BToKll_lep2_charge[BToKll_sel_index] < 0.) continue;
-    // std::cout << " BToKll_lep1_charge[BToKll_sel_index] = " << BToKll_lep1_charge[BToKll_sel_index] 
-    // 	      << " BToKll_lep2_charge[BToKll_sel_index] = " << BToKll_lep2_charge[BToKll_sel_index] << std::endl;
     ++nEv_chargeSel[0];
 
     float llInvPrefitMass = 0.;
