@@ -129,10 +129,10 @@ void computeAE_charged_fitBmass(std::string nonResonantFile, std::string Resonan
 
   //JPsi first - non resonant last
   float nEv_muonTag[7] = {0.};
-  float nEv_recoCand[7] = {0.};
-  float nEv_chargeEff[7] = {0.};
-  float nEv_alphaEff[7] = {0.};
-  float nEv_vtxCLEff[7] = {0.};
+  //float nEv_recoCand[7] = {0.};
+  //float nEv_chargeEff[7] = {0.};
+  //float nEv_alphaEff[7] = {0.};
+  //float nEv_vtxCLEff[7] = {0.};
   float nEv_LxyEff[7] = {0.};
 
   TH1F* h_Bmass_llbin[7];
