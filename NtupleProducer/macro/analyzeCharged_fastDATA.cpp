@@ -195,77 +195,68 @@ int main(int argc, char **argv){
   gStyle->SetOptFit(0);
 
   TChain* t1 = new TChain("Events");
-  //new prod Kee
-  if(isEleFinalState){
-    if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKee_ntuple/BPHParking1_2018A_18_09_07_elechargefix/*root");
-    if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKee_ntuple/BPHParking2_2018A_18_09_07_elechargefix/*root");
-    if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKee_ntuple/BPHParking3_2018A_18_09_07_elechargefix/*root");
-    if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKee_ntuple/BPHParking4_2018A_18_09_07_elechargefix/*root");
-    if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKee_ntuple/BPHParking5_2018A_18_09_07_elechargefix/*root");
-    if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKee_ntuple/BPHParking6_2018A_18_09_07_elechargefix/*root");
-
-    if((dataset == "runB" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKee_2018B_BPH1/*root");
-    if((dataset == "runB" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKee_2018B_BPH2/*root");
-    if((dataset == "runB" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKee_2018B_BPH3/*root");
-    if((dataset == "runB" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKee_2018B_BPH4/*root");
-    if((dataset == "runB" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKee_2018B_BPH5/*root");
-
-    if(dataset == "MC" && BPHRun == "nnResonant"){
-      t1->Add("/vols/cms/amartell/BParking/ntuPROD/newNANO_20Aug/ntu_BToKee_18_09_10.root");
-    }
-    if(dataset == "MC" && BPHRun == "Resonant"){
-      t1->Add("/vols/cms/amartell/BParking/ntuPROD/newNANO_20Aug/ntu_BToKJPsiee_18_09_10.root");
+  
+  if(ntupleList != "-1"){
+    std::string rootFileName;
+    std::ifstream inFileLong;
+    inFileLong.open(ntupleList.c_str(), std::ios::in);
+    while(!inFileLong.eof()){
+        if(inFileLong >> rootFileName){
+            t1->Add(rootFileName.c_str());
+            std::cout << " adding " << rootFileName << std::endl;
+        }
     }
   }
   else{
-    //round1 ntuples
-    // if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking1_2018A_18_08_14_new/*root");
-    // if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking2_2018A_18_08_14_new/*root");
-    // if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking3_2018A_18_08_14_new/*root");
-    // if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking4_2018A_18_08_14_new/*root");
-    // if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking5_2018A_18_08_14_new/*root");
-    // if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking6_2018A_18_08_14_new/*root");
+    if(isEleFinalState){
+    
+        if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKeeNtuple/PR27_BToKee/A1/*root");
+        if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKeeNtuple/PR27_BToKee/A2/*root");
+        if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("//vols/cms/vc1116/BParking/ntuPROD/data_BToKeeNtuple/PR27_BToKee/A3/*root");
+        if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKeeNtuple/PR27_BToKee/A4/*root");
+        if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKeeNtuple/PR27_BToKee/A5/*root");
+        if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKeeNtuple/PR27_BToKee/A6/*root");
 
-    // if((dataset == "runB" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking1_2018B_18_08_14_new/*root");
-    // if((dataset == "runB" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking2_2018B_18_08_14_new/*root");
-    // if((dataset == "runB" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking3_2018B_18_08_14_new/*root");
-    // if((dataset == "runB" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking4_2018B_18_08_14_new/*root");
-    // if((dataset == "runB" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BPHParking5_2018B_18_08_14_new/*root");
-
-    //need update wrt new production => check https://docs.google.com/spreadsheets/d/1Kdtaw0nGNXZ_O5-e7DR5WGOI0AOpUhccMfn4WIieGYU/edit#gid=0
-    if(ntupleList == "-1"){
-      if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A1/*root");
-      if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A2/*root");
-      if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A3/*root");
-      if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A4/*root");
-      if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A5/*root");
-      if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/old_BToKmumu/A6/*root");
-
-      if((dataset == "runB" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH1_NN/*root");
-      if((dataset == "runB" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH2_NN/*root");
-      if((dataset == "runB" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH3_NN/*root");
-      if((dataset == "runB" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH4_NN/*root");
-      if((dataset == "runB" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/amartell/BParking/ntuPROD/BPHrun2018B/BToKmumu_2018B_BPH5_NN/*root");
+        if((dataset == "runB" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKeeNtuple/PR27_BToKee/B1/*root");
+        if((dataset == "runB" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKeeNtuple/PR27_BToKee/B2/*root");
+        if((dataset == "runB" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKeeNtuple/PR27_BToKee/B3/*root");
+        if((dataset == "runB" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKeeNtuple/PR27_BToKee/B4/*root");
+        if((dataset == "runB" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKeeNtuple/PR27_BToKee/B5/*root"); 
+    
+        if(dataset == "MC" && BPHRun == "nnResonant"){
+            t1->Add("/vols/cms/amartell/BParking/ntuPROD/newNANO_20Aug/ntu_BToKee_18_09_10.root");
+        }
+    
+        if(dataset == "MC" && BPHRun == "Resonant"){
+            t1->Add("/vols/cms/amartell/BParking/ntuPROD/newNANO_20Aug/ntu_BToKJPsiee_18_09_10.root");
+        }
+    
     }
+    else{
+    
+        if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/PR27_BToKmumu/A1/*root");
+        if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/PR27_BToKmumu/A2/*root");
+        if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/PR27_BToKmumu/A3/*root");
+        if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/PR27_BToKmumu/A4/*root");
+        if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/PR27_BToKmumu/A5/*root");
+        if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/PR27_BToKmumu/A6/*root");
 
-    if(ntupleList != "-1"){
-      std::string rootFileName;
-      std::ifstream inFileLong;
-      inFileLong.open(ntupleList.c_str(), std::ios::in);
-      while(!inFileLong.eof()){
-	if(inFileLong >> rootFileName){
-	  t1->Add(rootFileName.c_str());
-	  std::cout << " adding " << rootFileName << std::endl;
-	}
-      }
+        if((dataset == "runB" && BPHRun == "1") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/PR27_BToKmumu/B1/*root");
+        if((dataset == "runB" && BPHRun == "2") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/PR27_BToKmumu/B2/*root");
+        if((dataset == "runB" && BPHRun == "3") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/PR27_BToKmumu/B3/*root");
+        if((dataset == "runB" && BPHRun == "4") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/PR27_BToKmumu/B4/*root");
+        if((dataset == "runB" && BPHRun == "5") || dataset == "-1") t1->Add("/vols/cms/vc1116/BParking/ntuPROD/data_BToKmumuNtuple/PR27_BToKmumu/B5/*root");        
+        
+        if(dataset == "MC" && BPHRun == "nnResonant"){
+            t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BToKmumu_18_08_14_new/*root");
+        }
+    
+        if(dataset == "MC" && BPHRun == "Resonant"){
+            t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BToKJPsimumu_18_08_14_new/*root");
+        }
+        
     }
-
-    if(dataset == "MC" && BPHRun == "nnResonant"){
-      t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BToKmumu_18_08_14_new/*root");
-    }
-    if(dataset == "MC" && BPHRun == "Resonant"){
-      t1->Add("/vols/cms/tstreble/BPH/BToKmumu_ntuple/BToKJPsimumu_18_08_14_new/*root");
-    }
+    
   }
 
   int nEvts = t1->GetEntries();
@@ -898,4 +889,4 @@ int main(int argc, char **argv){
   }
   outMassHistos.Close();
 
-}
+} 
