@@ -1,3 +1,9 @@
+// Please check configuration for
+// LeptonTrack
+// Resonant
+// BPHParking
+// data/mc
+
 #include <iostream>
 #include <fstream>
 #include "TFile.h"
@@ -41,6 +47,14 @@ int main(int argc, char** argv) {
   for (int i = 1; i < argc; ++i) {
     if(std::string(argv[i]) == "Resonant") {
       isResonant = true;
+      break;
+    }
+  }
+
+  bool isLeptonTrack = false;
+  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "LeptonTrack") {
+      isLeptonTrack = true;
       break;
     }
   }
@@ -146,11 +160,9 @@ int main(int argc, char** argv) {
 
   int _Muon_sel_index = -1;
   int _BToKee_sel_index = -1;
-  float _BToKee_eePrefit_mass = -1;
 
   tree_new->Branch("Muon_sel_index",&_Muon_sel_index,"Muon_sel_index/I");
   tree_new->Branch("BToKee_sel_index",&_BToKee_sel_index,"BToKee_sel_index/I");
-  tree_new->Branch("BToKee_eePrefit_mass",&_BToKee_eePrefit_mass,"BToKee_eePrefit_mass/F");
 
   int _GenPart_BToKee_index = -1;
   int _GenPart_JPsiFromB_index = -1;
@@ -218,7 +230,6 @@ int main(int argc, char** argv) {
 
     _Muon_sel_index = -1;
     _BToKee_sel_index = -1;
-    _BToKee_eePrefit_mass = -1;
 
     _GenPart_BToKee_index = -1;
     _GenPart_JPsiFromB_index = -1;
@@ -325,15 +336,6 @@ int main(int argc, char** argv) {
 	best_B_CL_vtx = B_CL_vtx;
 	_BToKee_sel_index = i_BToKee;
 
-	TLorentzVector ele1cand;
-	ele1cand.SetPtEtaPhiM(tree->Electron_pt[tree->BToKee_ele1_index[i_BToKee]], tree->Electron_eta[tree->BToKee_ele1_index[i_BToKee]],
-			      tree->Electron_phi[tree->BToKee_ele1_index[i_BToKee]], tree->Electron_mass[tree->BToKee_ele1_index[i_BToKee]]);
-
-	TLorentzVector ele2cand;
-	ele2cand.SetPtEtaPhiM(tree->Electron_pt[tree->BToKee_ele2_index[i_BToKee]], tree->Electron_eta[tree->BToKee_ele2_index[i_BToKee]],
-			      tree->Electron_phi[tree->BToKee_ele2_index[i_BToKee]], tree->Electron_mass[tree->BToKee_ele2_index[i_BToKee]]);
-
-	_BToKee_eePrefit_mass = (ele1cand+ele2cand).Mag();
       }
     }
 
@@ -509,6 +511,9 @@ int main(int argc, char** argv) {
 	float best_dR_KFromB = -1.;
 
 	int nElectron = tree->nElectron;
+	//for the moment just check best reco closest to gen 
+	//for lepton-lepton combination only
+	if(!isLeptonTrack){
 	for(int i_ele=0; i_ele<nElectron; i_ele++){
 
 	  TLorentzVector ele_tlv;
@@ -528,7 +533,7 @@ int main(int argc, char** argv) {
 	    _Electron_e2FromB_index = i_ele;
 	    best_dR_e2FromB = dR_e2FromB;
 	  }
-
+	}
 	}
 
 
