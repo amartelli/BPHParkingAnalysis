@@ -275,7 +275,6 @@ int main(int argc, char **argv){
   Float_t Kll_kaon_DCASig;
   Float_t Kll_Lxy;
   Float_t Kll_ctxy;
-  Float_t Kll_llmass;
   Float_t Kll_llRefitmass;
   Float_t Kll_llPrefitmass;
   Float_t Kll_mass;
@@ -317,7 +316,6 @@ int main(int argc, char **argv){
     newT->Branch("Kll_ctxy", &Kll_ctxy, "Kll_ctxy/F");
     newT->Branch("Kll_llRefitmass", &Kll_llRefitmass, "Kll_llRefitmass/F");
     newT->Branch("Kll_llPrefitmass", &Kll_llPrefitmass, "Kll_llPrefitmass/F");
-    newT->Branch("Kll_llmass", &Kll_llmass, "Kll_llmass/F");
     newT->Branch("Kll_mass", &Kll_mass, "Kll_mass/F");
     newT->Branch("Kll_pt", &Kll_pt, "Kll_pt/F");                
     newT->Branch("Kll_kaon_pt", &Kll_kaon_pt, "Kll_kaon_pt/F");
@@ -694,34 +692,12 @@ int main(int argc, char **argv){
     if(BToKll_lep1_charge[BToKll_sel_index]*BToKll_lep2_charge[BToKll_sel_index] > 0.) continue;
     ++nEv_chargeSel[0];
 
-    float llInvPrefitMass = 0.;
-    if(isEleFinalState){
-      TLorentzVector ele1cand;
-      ele1cand.SetPtEtaPhiM(Lepton_pt[BToKll_lep1_index[BToKll_sel_index]], Lepton_eta[BToKll_lep1_index[BToKll_sel_index]], 
-			    Lepton_phi[BToKll_lep1_index[BToKll_sel_index]], Lepton_mass[BToKll_lep1_index[BToKll_sel_index]]);
-      TLorentzVector ele2cand;
-      ele2cand.SetPtEtaPhiM(Lepton_pt[BToKll_lep2_index[BToKll_sel_index]], Lepton_eta[BToKll_lep2_index[BToKll_sel_index]], 
-			    Lepton_phi[BToKll_lep2_index[BToKll_sel_index]], Lepton_mass[BToKll_lep2_index[BToKll_sel_index]]);
-      /*
-      std::cout << " ele1 pt = " << Lepton_pt[BToKll_lep1_index[BToKll_sel_index]] 
-		<< " ele2 pt = " << Lepton_pt[BToKll_lep2_index[BToKll_sel_index]]
-		<< " ele1 eta = " << Lepton_eta[BToKll_lep1_index[BToKll_sel_index]] 
-		<< " ele2 eta = " << Lepton_eta[BToKll_lep2_index[BToKll_sel_index]] 
-		<< " ele1 mass  = " << Lepton_mass[BToKll_lep1_index[BToKll_sel_index]]
-		<< " ele2 mass = " << Lepton_mass[BToKll_lep2_index[BToKll_sel_index]] << std::endl;
-      */
 
-      llInvPrefitMass = (ele1cand+ele2cand).Mag();
-    }
-    //    std::cout << " llInvPrefitMass = " << llInvPrefitMass << std::endl;
-
+    //misleading it's refit for Kmumu default for Kee
     float llInvRefitMass = BToKll_llKFit_ll_mass[BToKll_sel_index];
-    float llInvMass = BToKll_ll_mass[BToKll_sel_index];
     int massBin = -1;
-    float massVar = llInvRefitMass;
-    if(isEleFinalState) massVar = llInvPrefitMass;
     for(unsigned int kl=0; kl<llMassBoundary.size()-1; ++kl){
-      if(massVar >= llMassBoundary[kl] && massVar < llMassBoundary[kl+1]){
+      if(llInvRefitMass >= llMassBoundary[kl] && llInvRefitMass < llMassBoundary[kl+1]){
 	massBin = kl;
 	break;
       }
@@ -752,9 +728,7 @@ int main(int argc, char **argv){
 	Kll_kaon_DCASig = BToKll_kaon_DCASig[BToKll_sel_index];
 	Kll_Lxy = BToKll_Lxy[BToKll_sel_index];
 	Kll_ctxy = BToKll_ctxy[BToKll_sel_index];
-	Kll_llmass = massVar;
 	Kll_llRefitmass = llInvRefitMass;
-	Kll_llPrefitmass = llInvPrefitMass;
 	Kll_mass = BToKll_mass[BToKll_sel_index];
 	Kll_pt = BToKll_pt[BToKll_sel_index];
 	Kll_kaon_pt = BToKll_kaon_pt[BToKll_sel_index];
@@ -813,18 +787,14 @@ int main(int argc, char **argv){
       if(std::abs(BToKll_lep2_eta[BToKll_sel_index]) < 1.47) hLep2pt_EB[massBin]->Fill(BToKll_lep2_pt[BToKll_sel_index]);
       else hLep2pt_EE[massBin]->Fill(BToKll_lep2_pt[BToKll_sel_index]);
 
-      hllPrefitMass[massBin]->Fill(llInvPrefitMass);
       hllRefitMass[massBin]->Fill(llInvRefitMass);
-      hllMass[massBin]->Fill(llInvMass);
-      hllMass_vs_Bmass[massBin]->Fill(BToKll_mass[BToKll_sel_index], llInvPrefitMass);
+      hllMass_vs_Bmass[massBin]->Fill(BToKll_mass[BToKll_sel_index], llInvRefitMass);
       hBmass[massBin]->Fill(BToKll_mass[BToKll_sel_index]);
     }
     
     //histograms inclusive over all m(ll)
-    hllPrefitMass[6]->Fill(llInvPrefitMass);
     hllRefitMass[6]->Fill(llInvRefitMass);
-    hllMass[6]->Fill(llInvMass);
-    hllMass_vs_Bmass[6]->Fill(BToKll_mass[BToKll_sel_index], llInvPrefitMass);
+    hllMass_vs_Bmass[6]->Fill(BToKll_mass[BToKll_sel_index], llInvRefitMass);
     hBmass[6]->Fill(BToKll_mass[BToKll_sel_index]);
     
     hAlpha[6]->Fill(BToKll_cosAlpha[BToKll_sel_index]);
