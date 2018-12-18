@@ -1,3 +1,9 @@
+// Please check configuration for 
+// LeptonTrack
+// Resonant
+// BPHParking
+// data/mc
+
 #include <iostream>
 #include <fstream>
 #include "TFile.h"
@@ -108,6 +114,14 @@ int main(int argc, char** argv) {
   for (int i = 1; i < argc; ++i) {
     if(std::string(argv[i]) == "Resonant") {
       isResonant = true;
+      break;
+    }
+  }
+
+ bool isLeptonTrack = false;
+  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "LeptonTrack") {
+      isLeptonTrack = true;
       break;
     }
   }
@@ -341,7 +355,29 @@ int main(int argc, char** argv) {
       
       for(int i_mu=0; i_mu<nMuon; i_mu++){
 
-	if(i_mu==tree->BToKmumu_mu1_index[_BToKmumu_sel_index] || i_mu==tree->BToKmumu_mu2_index[_BToKmumu_sel_index]) continue;
+	//if lepton lepton just check index 
+	if(!isLeptonTrack && (i_mu==tree->BToKmumu_mu1_index[_BToKmumu_sel_index] || i_mu==tree->BToKmumu_mu2_index[_BToKmumu_sel_index])) continue;
+
+	//if tracks check dR for subleading ele
+	if(isLeptonTrack){
+
+	  if(i_mu==tree->BToKmumu_mu1_index[_BToKmumu_sel_index]) continue;
+          TLorentzVector mu2_tlv;
+          TLorentzVector muHLT_tlv;
+
+          mu2_tlv.SetPtEtaPhiM(tree->BToKmumu_mu2_pt[_BToKmumu_sel_index],
+                               tree->BToKmumu_mu2_eta[_BToKmumu_sel_index],
+                               tree->BToKmumu_mu2_phi[_BToKmumu_sel_index],
+                               MuonMass_);
+
+          muHLT_tlv.SetPtEtaPhiM(tree->Muon_pt[i_mu],
+				 tree->Muon_eta[i_mu],
+				 tree->Muon_phi[i_mu],
+				 MuonMass_);
+
+          float dR_mu2FromHLT = mu2_tlv.DeltaR(muHLT_tlv);
+	  if(dR_mu2FromHLT < 0.1) continue;
+	}
 
 	if(tree->Muon_softId[i_mu] && tree->Muon_pt[i_mu] > 8.
 	   && (!isBPHParking || _Muon_isHLT_BPHParking[i_mu])){
@@ -532,6 +568,9 @@ int main(int argc, char** argv) {
 	float best_dR_mu2FromB = -1.;
 	float best_dR_KFromB = -1.;
 
+	//for the moment just check best reco closest to gen
+	//for lepton-lepton combination only
+	if(!isLeptonTrack){  
 	for(int i_mu=0; i_mu<nMuon; i_mu++){
 
 	  TLorentzVector mu_tlv;
@@ -551,7 +590,7 @@ int main(int argc, char** argv) {
 	    _Muon_mu2FromB_index = i_mu;
 	    best_dR_mu2FromB = dR_mu2FromB;
 	  }
-
+	}
 	}
 
 	int nPFCand = tree->nPFCand;
