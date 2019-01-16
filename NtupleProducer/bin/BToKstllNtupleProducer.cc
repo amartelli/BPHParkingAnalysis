@@ -26,6 +26,11 @@ float MuonMass_ = 0.10565837;
 float ElectronMass_ = 0.5109989e-3;
 
 
+bool comparePairs(const std::pair<int, float>& i, const std::pair<int, float>& j){
+  return i.second > j.second;
+}
+
+
 int main(int argc, char **argv){
 
   if(argc < 2) {
@@ -192,10 +197,12 @@ int main(int argc, char **argv){
 
   //New branches
   int _BToKstll_sel_index = -1;
+  std::vector<int> _BToKstll_order_index;
   int _Muon_sel_index = -1; //Probe muon with selection algo.
   int _Muon_probe_index = -1; //Probe muon for Acc.xEff. = _Muon_sel_index in data
 
   tree_new->Branch("BToKstll_sel_index",&_BToKstll_sel_index,"BToKstll_sel_index/I");
+  tree_new->Branch("BToKstll_order_index", &_BToKstll_order_index);
   tree_new->Branch("Muon_sel_index",&_Muon_sel_index,"Muon_sel_index/I");
   tree_new->Branch("Muon_probe_index",&_Muon_probe_index,"Muon_probe_index/I");
 
@@ -270,6 +277,7 @@ int main(int argc, char **argv){
     if(iEntry%10000==0) std::cout << " Entry #" << iEntry << " " << int(100*float(iEntry)/nentries) << "%" << std::endl;
 
     _BToKstll_sel_index = -1;
+    _BToKstll_order_index.clear();
     _Muon_sel_index = -1;  //tag muon
     _Muon_probe_index = -1;
 
@@ -371,9 +379,14 @@ int main(int argc, char **argv){
       }
     }
 
-    //FIXME
-    //here sort the B_vtxCL_idx_val vector by CL_vtx and save in extra branch with sorted order
-    //FIXME
+    std::sort(B_vtxCL_idx_val.begin(), B_vtxCL_idx_val.end(), comparePairs);
+    int ipCount = 0;
+    _BToKstll_order_index.resize(B_vtxCL_idx_val.size());
+    for(auto ip : B_vtxCL_idx_val){
+      _BToKstll_order_index[ip.first] = ipCount;
+      ++ipCount;
+    }
+
 
     //Take as tag muon leading soft ID muon + trigger-matched
 
