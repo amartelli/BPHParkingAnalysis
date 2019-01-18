@@ -1,6 +1,7 @@
 // BToKstllNtupleProducer --isMC (0,1,2) --isResonant (0, 1, -1) --isEleFS (0, 1) --isKstFS (0, 1) --isLT (0, 1) --output ("outfile") --input ("inputFile")
 
-// new features => gen_index refers to the closest in dR, no minimum dR required
+// new features => gen_index refers to the closest in dR - provided gen B and decays are within acceptance -, 
+//                 no minimum dR required
 //                 saved branch with dR of gen-reco lep1, lep2, kaon
 //              => for gen_tag_muon do not require minimum pT
 //                 saved branch with highest pT of extra muon (tag candidate)
@@ -25,6 +26,9 @@ float KaonMass_ = 0.493677;
 float MuonMass_ = 0.10565837;
 float ElectronMass_ = 0.5109989e-3;
 
+
+float maxEtacceptance_ = 2.45; //2.4
+float minPtacceptance_ = 0.7;  //1.
 
 bool comparePairs(const std::pair<int, float>& i, const std::pair<int, float>& j){
   return i.second > j.second;
@@ -469,6 +473,10 @@ int main(int argc, char **argv){
 
 		for(int j_gen=0; j_gen<nGenPart; j_gen++){
 		  int pdgId = tree->GenPart_pdgId[j_gen];
+		  float partPt = tree->GenPart_pt[i_gen];
+		  float partEta = tree->GenPart_eta[i_gen];
+		  if(partPt < minPtacceptance_) continue;
+		  if(std::abs(partEta) > maxEtacceptance_) continue;
 		  int mother_index = tree->GenPart_genPartIdxMother[j_gen];
 		  if(abs(pdgId)==leptonID && mother_index == i_gen && lep1_index < 0)
 		    lep1_index = j_gen;
@@ -511,6 +519,10 @@ int main(int argc, char **argv){
 	    for(int i_gen=0; i_gen<nGenPart; i_gen++){
 
 	      int pdgId = tree->GenPart_pdgId[i_gen];
+	      float partPt = tree->GenPart_pt[i_gen];
+	      float partEta = tree->GenPart_eta[i_gen];
+	      if(partPt < minPtacceptance_) continue;
+	      if(std::abs(partEta) > maxEtacceptance_) continue;
 	      int mother_index = tree->GenPart_genPartIdxMother[i_gen];
 	      if(abs(pdgId) == leptonID && mother_index == i_Bu && _GenPart_lep1FromB_index < 0)
 		_GenPart_lep1FromB_index = i_gen;
@@ -529,7 +541,6 @@ int main(int argc, char **argv){
 	} //loop over B
       }// non resonant
     
-      
       if(_GenPart_BToKstll_index >= 0){
 
 	//lep1FromB stored a leading daughter
