@@ -187,6 +187,7 @@ int main(int argc, char **argv){
 
     while(!inFileLong.eof()){
       inFileLong >> reader;
+      if( inFileLong.eof() ) break;
       std::cout << " Adding " << reader << std::endl;
       oldtree->Add(reader.c_str());
     }
