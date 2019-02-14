@@ -97,10 +97,7 @@ void setStyle()
   style->SetTitleFont(42, "XYZ");
   style->SetTitleSize(0.06, "XYZ");
   style->SetTitleXOffset(0.9);
-  // style->SetTitleYOffset(1.5);
-  // style->SetTitleYOffset(1.5);
-  style->SetTitleYOffset(1.4);
-  style->SetTitleYOffset(1.4);
+  style->SetTitleYOffset(1.2);
   //  style->SetTitleOffset(1.3,"Y");
                                                                                                                                                                             
   // For the axis labels:  
