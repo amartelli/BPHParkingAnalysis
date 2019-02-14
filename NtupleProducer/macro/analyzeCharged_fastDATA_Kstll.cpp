@@ -527,14 +527,12 @@ int main(int argc, char **argv){
   TH1F* hLep1pt_EE[7];
   TH1F* hLep2pt_EE[7];
   TH1F* hBpt[7];
-  TH1F* hllMass[7];
-  TH1F* hllRefitMass[7];
-  TH1F* hllPrefitMass[7];
-  TH2F* hllMass_vs_Bmass[7];
+  TH1F* hllRefitMass[7];  
+  TH2F* hllRefitMass_vs_Bmass[7];
   TH1F* hBmass[7];
 
   for(int ij=0; ij<7; ++ij){
-    hAlpha[ij] = new TH1F(Form("hAlpha_bin%d", ij), "", 500, 0, 1.1);
+    hAlpha[ij] = new TH1F(Form("hAlpha_%d", ij), "", 500, 0, 1.1);
     hAlpha[ij]->Sumw2();
     hAlpha[ij]->SetLineColor(kRed);
     hAlpha[ij]->SetLineWidth(2);
@@ -559,20 +557,10 @@ int main(int argc, char **argv){
     hllRefitMass[ij]->SetLineColor(kRed);
     hllRefitMass[ij]->SetLineWidth(2);
 
-    hllPrefitMass[ij] = new TH1F(Form("hllPrefitMass_%d", ij), "", 750, 0., 15.);
-    hllPrefitMass[ij]->Sumw2();
-    hllPrefitMass[ij]->SetLineColor(kRed);
-    hllPrefitMass[ij]->SetLineWidth(2);
-
-    hllMass[ij] = new TH1F(Form("hllMass_%d", ij), "", 750, 0., 15.);
-    hllMass[ij]->Sumw2();
-    hllMass[ij]->SetLineColor(kRed);
-    hllMass[ij]->SetLineWidth(2);
-
-    hllMass_vs_Bmass[ij] = new TH2F(Form("hllMass_vs_Bmass_%d", ij), "", 500, 0., 15., 500, 0., 15.);
-    hllMass_vs_Bmass[ij]->Sumw2();
-    hllMass_vs_Bmass[ij]->SetMarkerColor(kRed);
-    hllMass_vs_Bmass[ij]->SetMarkerStyle(20);
+    hllRefitMass_vs_Bmass[ij] = new TH2F(Form("hllRefitMass_vs_Bmass_%d", ij), "", 500, 0., 15., 500, 0., 15.);
+    hllRefitMass_vs_Bmass[ij]->Sumw2();
+    hllRefitMass_vs_Bmass[ij]->SetMarkerColor(kRed);
+    hllRefitMass_vs_Bmass[ij]->SetMarkerStyle(20);
 
     hBmass[ij] = new TH1F(Form("Bmass_%d", ij), "", 750, 0., 15.); // 75, 4.5, 6.);
     hBmass[ij]->Sumw2();
@@ -752,13 +740,13 @@ int main(int argc, char **argv){
       else hLep2pt_EE[massBin]->Fill(BToKstll_lep2_pt[BToKstll_sel_index]);
 
       hllRefitMass[massBin]->Fill(llInvRefitMass);
-      hllMass_vs_Bmass[massBin]->Fill(BToKstll_B_mass[BToKstll_sel_index], llInvRefitMass);
+      hllRefitMass_vs_Bmass[massBin]->Fill(BToKstll_B_mass[BToKstll_sel_index], llInvRefitMass);
       hBmass[massBin]->Fill(BToKstll_B_mass[BToKstll_sel_index]);
     }
     
     //histograms inclusive over all m(ll)
     hllRefitMass[6]->Fill(llInvRefitMass);
-    hllMass_vs_Bmass[6]->Fill(BToKstll_B_mass[BToKstll_sel_index], llInvRefitMass);
+    hllRefitMass_vs_Bmass[6]->Fill(BToKstll_B_mass[BToKstll_sel_index], llInvRefitMass);
     hBmass[6]->Fill(BToKstll_B_mass[BToKstll_sel_index]);
     
     hAlpha[6]->Fill(BToKstll_B_cosAlpha[BToKstll_sel_index]);
@@ -809,10 +797,8 @@ int main(int argc, char **argv){
     hBpt[ij]->Write(hBpt[ij]->GetName());
     std::cout << " >>> hBpt[ij]->GetName() = " << hBpt[ij]->GetName() << " entries = " << hBpt[ij]->GetEntries() << std::endl;
 
-    hllMass[ij]->Write(hllMass[ij]->GetName());
     hllRefitMass[ij]->Write(hllRefitMass[ij]->GetName());
-    hllPrefitMass[ij]->Write(hllPrefitMass[ij]->GetName());
-    hllMass_vs_Bmass[ij]->Write(hllMass_vs_Bmass[ij]->GetName());
+    hllRefitMass_vs_Bmass[ij]->Write(hllRefitMass_vs_Bmass[ij]->GetName());
     hBmass[ij]->Write(hBmass[ij]->GetName());
 
     if(ij > 5) continue;
