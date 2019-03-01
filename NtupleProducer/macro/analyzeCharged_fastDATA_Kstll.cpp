@@ -413,6 +413,9 @@ int main(int argc, char **argv){
   float PFCand_dz[kPFCandMax];
   
   int   BToKstll_gen_index = -1;
+  float BToKstll_gendR_lep1FromB[kMuonMax];
+  float BToKstll_gendR_lep2FromB[kMuonMax];
+  float BToKstll_gendR_KFromB[kMuonMax];
   
   float Lepton_pfRelIso03[kMuonMax];
   float Lepton_pfRelIso04[kMuonMax];
@@ -466,6 +469,9 @@ int main(int argc, char **argv){
   
   if(dataset == "MC"){      
     t1->SetBranchStatus("BToKstll_gen_index", 1);       t1->SetBranchAddress("BToKstll_gen_index", &BToKstll_gen_index);
+    t1->SetBranchStatus("BToKstll_gendR_lep1FromB", 1); t1->SetBranchAddress("BToKstll_gendR_lep1FromB", &BToKstll_gendR_lep1FromB);
+    t1->SetBranchStatus("BToKstll_gendR_lep2FromB", 1); t1->SetBranchAddress("BToKstll_gendR_lep2FromB", &BToKstll_gendR_lep2FromB);
+    t1->SetBranchStatus("BToKstll_gendR_KFromB", 1);    t1->SetBranchAddress("BToKstll_gendR_KFromB", &BToKstll_gendR_KFromB);
   }
   
   
@@ -634,6 +640,7 @@ int main(int argc, char **argv){
 
     if(BToKstll_sel_index == -1) continue; 
     if(dataset == "MC" && BPHRun == "nnResonant" && BToKstll_sel_index != BToKstll_gen_index) continue;
+    if( dataset == "MC" && ( BToKstll_gendR_lep1FromB[BToKstll_gen_index]>0.1 || BToKstll_gendR_lep2FromB[BToKstll_gen_index]>0.1 || BToKstll_gendR_KFromB[BToKstll_gen_index]>0.1 ) )continue;
     ++nEv_recoCand[0]; 
 
     //opposite sign leptons
