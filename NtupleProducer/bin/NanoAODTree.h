@@ -19,6 +19,9 @@
 #include <TChain.h>
 #include <TTree.h>
 
+const int kLeptonMax = 100; // set to 2 times nTriplets
+const int kBToKstllMax = 50;
+
 const int kMuonMax = 100;
 const int kElectronMax = 100;
 const int kBToKpipiMax = 1000000;
@@ -50,6 +53,26 @@ public :
    float Muon_pfRelIso04_all[kMuonMax];
    bool Muon_softId[kMuonMax];
    bool Muon_mediumId[kMuonMax];
+
+
+   uint nBToKstll;
+   float BToKstll_B_CL_vtx[kBToKstllMax];
+   int BToKstll_lep1_charge[kBToKstllMax];
+   int BToKstll_lep1_index[kBToKstllMax];
+   float BToKstll_lep1_pt[kBToKstllMax];
+   float BToKstll_lep1_eta[kBToKstllMax];
+   float BToKstll_lep1_phi[kBToKstllMax];
+   int BToKstll_lep2_charge[kBToKstllMax];
+   int BToKstll_lep2_index[kBToKstllMax];
+   float BToKstll_lep2_pt[kBToKstllMax];
+   float BToKstll_lep2_eta[kBToKstllMax];
+   float BToKstll_lep2_phi[kBToKstllMax];
+   //int BToKstll_kaon_charge[kBToKstllMax];
+   float BToKstll_kaon_pt[kBToKstllMax];
+   float BToKstll_kaon_eta[kBToKstllMax];
+   float BToKstll_kaon_phi[kBToKstllMax];
+
+
 
    uint nElectron;
    int Electron_charge[kElectronMax];
@@ -226,6 +249,27 @@ void NanoAODTree::Init(TChain* tree)
   _tree->SetBranchAddress("Electron_mass",&Electron_mass);
   _tree->SetBranchAddress("Electron_dxy",&Electron_dxy);
   _tree->SetBranchAddress("Electron_dz",&Electron_dz);
+
+
+  int BToKstll_info = _tree->SetBranchAddress("nBToKstll",&nBToKstll);
+  if(BToKstll_info >= 0){
+    _tree->SetBranchAddress("BToKstll_B_CL_vtx",&BToKstll_B_CL_vtx);
+    _tree->SetBranchAddress("BToKstll_lep1_charge",&BToKstll_lep1_charge);
+    _tree->SetBranchAddress("BToKstll_lep1_index",&BToKstll_lep1_index);
+    _tree->SetBranchAddress("BToKstll_lep1_pt",&BToKstll_lep1_pt);
+    _tree->SetBranchAddress("BToKstll_lep1_eta",&BToKstll_lep1_eta);
+    _tree->SetBranchAddress("BToKstll_lep1_phi",&BToKstll_lep1_phi);
+    _tree->SetBranchAddress("BToKstll_lep2_charge",&BToKstll_lep2_charge);
+    _tree->SetBranchAddress("BToKstll_lep2_index",&BToKstll_lep2_index);
+    _tree->SetBranchAddress("BToKstll_lep2_pt",&BToKstll_lep2_pt);
+    _tree->SetBranchAddress("BToKstll_lep2_eta",&BToKstll_lep2_eta);
+    _tree->SetBranchAddress("BToKstll_lep2_phi",&BToKstll_lep2_phi);
+    //_tree->SetBranchAddress("BToKstll_kaon_charge",&BToKstll_kaon_charge);
+    _tree->SetBranchAddress("BToKstll_kaon_pt",&BToKstll_kaon_pt);
+    _tree->SetBranchAddress("BToKstll_kaon_eta",&BToKstll_kaon_eta);
+    _tree->SetBranchAddress("BToKstll_kaon_phi",&BToKstll_kaon_phi);
+  }
+
 
   int BToKpipi_info = _tree->SetBranchAddress("nBToKpipi",&nBToKpipi);
   if(BToKpipi_info>=0){
