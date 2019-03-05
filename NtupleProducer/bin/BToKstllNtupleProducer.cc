@@ -424,7 +424,6 @@ int main(int argc, char **argv){
       //not found other reco muon matched to trigger for this triplet
       if(_Muon_sel_index == -1) {
 	_Muon_tag_index[i_Btree] = -1;
-	continue;
       }
       float B_CL_vtx = tree->BToKstll_B_CL_vtx[i_Btree];
       B_vtxCL_idx_val.push_back(std::pair<int, float>(i_Btree, B_CL_vtx));
@@ -445,10 +444,9 @@ int main(int argc, char **argv){
 
 
     //Take as tag muon leading soft ID muon + trigger-matched
-
     if(isMC == 0 && _BToKstll_sel_index<0) continue;
 
-
+    //re-assign proper Muon_sel_index for chosen triplet
     if(_BToKstll_sel_index>=0){
       _Muon_sel_index = _Muon_tag_index[_BToKstll_sel_index]; 
     }
