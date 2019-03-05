@@ -203,11 +203,13 @@ int main(int argc, char **argv){
   int _BToKstll_sel_index = -1;
   std::vector<int> _BToKstll_order_index;
   int _Muon_sel_index = -1; //Probe muon with selection algo.
+  std::vector<int> _Muon_tag_index; //Probe muon with selection algo.
   int _Muon_probe_index = -1; //Probe muon for Acc.xEff. = _Muon_sel_index in data
 
   tree_new->Branch("BToKstll_sel_index",&_BToKstll_sel_index,"BToKstll_sel_index/I");
   tree_new->Branch("BToKstll_order_index", &_BToKstll_order_index);
   tree_new->Branch("Muon_sel_index",&_Muon_sel_index,"Muon_sel_index/I");
+  tree_new->Branch("Muon_tag_index",&_Muon_tag_index,"Muon_tag_index/I");
   tree_new->Branch("Muon_probe_index",&_Muon_probe_index,"Muon_probe_index/I");
 
 
@@ -283,6 +285,7 @@ int main(int argc, char **argv){
     _BToKstll_sel_index = -1;
     _BToKstll_order_index.clear();
     _Muon_sel_index = -1;  //tag muon
+    _Muon_tag_index.clear();
     _Muon_probe_index = -1;
 
     _GenPart_BToKstll_index = -1;
@@ -374,6 +377,55 @@ int main(int argc, char **argv){
       //already applied in nanoAOD production
       if(tree->BToKstll_lep1_charge[i_Btree] * tree->BToKstll_lep2_charge[i_Btree] > 0.) continue;
 
+      //consider triplet only if other trigger muon exists
+      _Muon_sel_index = -1;
+      for(int i_mu=0; i_mu<nMuon; i_mu++){
+	//muon passing soft ID + trigger matched
+	if(!tree->Muon_softId[i_mu] || tree->Muon_pt[i_mu] < genMuPtCut) continue;
+	if(isMC != 2 && !_Muon_isHLT_BPHParking[i_mu]) continue;
+
+	//if lepton lepton just check index
+	if(isLeptonTrack == 0 && isEleFinalState == 0 &&
+	   (i_mu == tree->BToKstll_lep1_index[_BToKstll_sel_index] || i_mu == tree->BToKstll_lep2_index[_BToKstll_sel_index])) continue;
+	
+	//if tracks or electrons or is passed
+	//check dR for leading and subleading
+	
+	TLorentzVector lep1_tlv;
+	TLorentzVector lep2_tlv;
+	TLorentzVector muHLT_tlv;
+	
+	lep1_tlv.SetPtEtaPhiM(tree->BToKstll_lep1_pt[i_Btree],
+			      tree->BToKstll_lep1_eta[i_Btree],
+			      tree->BToKstll_lep1_phi[i_Btree],
+			    (isEleFinalState == 1) ? ElectronMass_ : MuonMass_);
+	lep2_tlv.SetPtEtaPhiM(tree->BToKstll_lep2_pt[i_Btree],
+			      tree->BToKstll_lep2_eta[i_Btree],
+			      tree->BToKstll_lep2_phi[i_Btree],
+			      (isEleFinalState == 1) ? ElectronMass_ : MuonMass_);
+	muHLT_tlv.SetPtEtaPhiM(tree->Muon_pt[i_mu],
+			       tree->Muon_eta[i_mu],
+			       tree->Muon_phi[i_mu],
+			       MuonMass_);
+	
+	float dR_lep1FromHLT = lep1_tlv.DeltaR(muHLT_tlv);
+	if(dR_lep1FromHLT < 0.02) continue;
+	float dR_lep2FromHLT = lep2_tlv.DeltaR(muHLT_tlv);
+	if(dR_lep2FromHLT < 0.02) continue;
+	  
+	//enough to find 1 extra muon matched to the trigger    
+	_Muon_sel_index = i_mu;
+	_Muon_tag_index[i_Btree] = i_mu;
+	break;
+	
+      }//loop over muons
+      /////////////////////
+
+      //not found other reco muon matched to trigger for this triplet
+      if(_Muon_sel_index == -1) {
+	_Muon_tag_index[i_Btree] = -1;
+	continue;
+      }
       float B_CL_vtx = tree->BToKstll_B_CL_vtx[i_Btree];
       B_vtxCL_idx_val.push_back(std::pair<int, float>(i_Btree, B_CL_vtx));
       
@@ -398,46 +450,7 @@ int main(int argc, char **argv){
 
 
     if(_BToKstll_sel_index>=0){
-      
-      for(int i_mu=0; i_mu<nMuon; i_mu++){
-
-	//muon passing soft ID + trigger matched
-	if(!tree->Muon_softId[i_mu] || tree->Muon_pt[i_mu] < genMuPtCut) continue;
-	if(isMC != 2 && !_Muon_isHLT_BPHParking[i_mu]) continue;
-
-	//if lepton lepton just check index 
-	if(isLeptonTrack == 0 && isEleFinalState == 0 && 
-	   (i_mu == tree->BToKstll_lep1_index[_BToKstll_sel_index] || i_mu == tree->BToKstll_lep2_index[_BToKstll_sel_index])) continue;
-
-	//if tracks or electrons of anyway
-	//check dR for leading and subleading
-
-	TLorentzVector lep1_tlv;
-	TLorentzVector lep2_tlv;
-	TLorentzVector muHLT_tlv;
-
-	lep1_tlv.SetPtEtaPhiM(tree->BToKstll_lep1_pt[_BToKstll_sel_index],
-			      tree->BToKstll_lep1_eta[_BToKstll_sel_index],
-			      tree->BToKstll_lep1_phi[_BToKstll_sel_index],
-			      (isEleFinalState == 1) ? ElectronMass_ : MuonMass_);
-	lep2_tlv.SetPtEtaPhiM(tree->BToKstll_lep2_pt[_BToKstll_sel_index],
-			      tree->BToKstll_lep2_eta[_BToKstll_sel_index],
-			      tree->BToKstll_lep2_phi[_BToKstll_sel_index],
-			      (isEleFinalState == 1) ? ElectronMass_ : MuonMass_);
-	muHLT_tlv.SetPtEtaPhiM(tree->Muon_pt[i_mu],
-			       tree->Muon_eta[i_mu],
-			       tree->Muon_phi[i_mu],
-			       MuonMass_);
-
-	float dR_lep1FromHLT = lep1_tlv.DeltaR(muHLT_tlv);
-	if(dR_lep1FromHLT < 0.01) continue;
-	float dR_lep2FromHLT = lep2_tlv.DeltaR(muHLT_tlv);
-	if(dR_lep2FromHLT < 0.01) continue;
-
-	//enough to find 1 extra muon matched to the trigger
-	_Muon_sel_index = i_mu;
-	break;
-      }
+      _Muon_sel_index = _Muon_tag_index[_BToKstll_sel_index]; 
     }
 
     //!!! Can have selected B->Kstll even without additional tag muons
