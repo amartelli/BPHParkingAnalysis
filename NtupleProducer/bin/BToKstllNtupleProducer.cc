@@ -210,7 +210,7 @@ int main(int argc, char **argv){
   tree_new->Branch("BToKstll_sel_index",&_BToKstll_sel_index,"BToKstll_sel_index/I");
   tree_new->Branch("BToKstll_order_index", &_BToKstll_order_index);
   tree_new->Branch("Muon_sel_index",&_Muon_sel_index,"Muon_sel_index/I");
-  tree_new->Branch("Muon_tag_index",&_Muon_tag_index,"Muon_tag_index/I");
+  tree_new->Branch("Muon_tag_index",&_Muon_tag_index);
   tree_new->Branch("Muon_probe_index",&_Muon_probe_index,"Muon_probe_index/I");
 
 
@@ -369,6 +369,7 @@ int main(int argc, char **argv){
     int nBinTree = tree->nBToKstll;
     float best_B_CL_vtx = -1.;
     std::vector<std::pair<int, float>> B_vtxCL_idx_val;
+    _Muon_tag_index.resize(nBinTree);
 
     for(int i_Btree=0; i_Btree<nBinTree; ++i_Btree){            
 
@@ -413,7 +414,7 @@ int main(int argc, char **argv){
 	if(dR_lep1FromHLT < 0.02) continue;
 	float dR_lep2FromHLT = lep2_tlv.DeltaR(muHLT_tlv);
 	if(dR_lep2FromHLT < 0.02) continue;
-	  
+
 	//enough to find 1 extra muon matched to the trigger    
 	_Muon_sel_index = i_mu;
 	_Muon_tag_index[i_Btree] = i_mu;
@@ -421,11 +422,11 @@ int main(int argc, char **argv){
 	
       }//loop over muons
       /////////////////////
-
       //not found other reco muon matched to trigger for this triplet
       if(_Muon_sel_index == -1) {
 	_Muon_tag_index[i_Btree] = -1;
       }
+
       float B_CL_vtx = tree->BToKstll_B_CL_vtx[i_Btree];
       B_vtxCL_idx_val.push_back(std::pair<int, float>(i_Btree, B_CL_vtx));
       
