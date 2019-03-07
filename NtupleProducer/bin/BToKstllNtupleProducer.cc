@@ -50,7 +50,7 @@ int main(int argc, char **argv){
   string input = "";
   string listFilesTXT = "";
   bool inputTXT = false;
-  float genMuPtCut = 8.;
+  float genMuPtCut = 5.;
   bool overwrite = false;
   for (int i = 1; i < argc; ++i) {
     if(std::string(argv[i]) == "--isMC") {
@@ -258,6 +258,14 @@ int main(int argc, char **argv){
   bool _HLT_Mu8_IP3 = false;
   bool _HLT_BPHParking = false;
 
+  //for MC
+  bool _HLT_Mu8_IP6 = false;
+  bool _HLT_Mu8_IP5 = false;
+  bool _HLT_Mu9_IP4 = false;
+  bool _HLT_Mu7_IP4 = false;
+  bool _HLT_Mu9_IP5 = false;
+  bool _HLT_Mu12_IP6 = false;
+
   bool _Muon_isHLT_BPHParking[kMuonMax];
 
   tree_new->Branch("HLT_Mu8p5_IP3p5",&_HLT_Mu8p5_IP3p5,"HLT_Mu8p5_IP3p5/O");
@@ -275,6 +283,9 @@ int main(int argc, char **argv){
   
   for (int iEntry = 0; iEntry < nentries; ++iEntry){
     
+    bool debug = false;
+    //if(iEntry == 419) debug = true;
+
     int out = tree->GetEntry(iEntry);
     if(out<0){
       std::cout << " Error retrievieng entry #" << iEntry << std::endl;
@@ -311,10 +322,19 @@ int main(int argc, char **argv){
     _HLT_Mu8_IP3 = false;
     _HLT_BPHParking = false;
     
+    //for MC
+    _HLT_Mu8_IP6 = false;
+    _HLT_Mu8_IP5 = false;
+    _HLT_Mu9_IP4 = false;
+    _HLT_Mu7_IP4 = false;
+    _HLT_Mu9_IP5 = false;
+    _HLT_Mu12_IP6 = false;
+
     //look for trigger muon
     int nMuon = tree->nMuon;
-    
+    int nTriggeringMuons = 0;
     for(int i_mu=0; i_mu<nMuon; i_mu++){
+
 
       //Trigger selection + matching
       _HLT_Mu8p5_IP3p5 = tree->HLT_Mu8p5_IP3p5_part0
@@ -341,28 +361,87 @@ int main(int argc, char **argv){
 	  || tree->HLT_Mu8_IP3_part3
 	  || tree->HLT_Mu8_IP3_part4
 	  || tree->HLT_Mu8_IP3_part5;
+	if(isMC != 0){
+	  _HLT_Mu8_IP6 = tree->HLT_Mu8_IP6_part0
+	    || tree->HLT_Mu8_IP6_part1
+	    || tree->HLT_Mu8_IP6_part2
+	    || tree->HLT_Mu8_IP6_part3
+	    || tree->HLT_Mu8_IP6_part4
+	    || tree->HLT_Mu8_IP6_part5;
+	  _HLT_Mu8_IP5 = tree->HLT_Mu8_IP5_part0
+	    || tree->HLT_Mu8_IP5_part1
+	    || tree->HLT_Mu8_IP5_part2
+	    || tree->HLT_Mu8_IP5_part3
+	    || tree->HLT_Mu8_IP5_part4
+	    || tree->HLT_Mu8_IP5_part5;
+	  _HLT_Mu9_IP4 = tree->HLT_Mu9_IP4_part0
+	    || tree->HLT_Mu9_IP4_part1
+	    || tree->HLT_Mu9_IP4_part2
+	    || tree->HLT_Mu9_IP4_part3
+	    || tree->HLT_Mu9_IP4_part4
+	    || tree->HLT_Mu9_IP4_part5;
+	  _HLT_Mu7_IP4 = tree->HLT_Mu7_IP4_part0
+	    || tree->HLT_Mu7_IP4_part1
+	    || tree->HLT_Mu7_IP4_part2
+	    || tree->HLT_Mu7_IP4_part3
+	    || tree->HLT_Mu7_IP4_part4
+	    || tree->HLT_Mu7_IP4_part5;
+	  _HLT_Mu9_IP5 = tree->HLT_Mu9_IP5_part0
+	    || tree->HLT_Mu9_IP5_part1
+	    || tree->HLT_Mu9_IP5_part2
+	    || tree->HLT_Mu9_IP5_part3
+	    || tree->HLT_Mu9_IP5_part4
+	    || tree->HLT_Mu9_IP5_part5;
+	  _HLT_Mu12_IP6 = tree->HLT_Mu12_IP6_part0
+	    || tree->HLT_Mu12_IP6_part1
+	    || tree->HLT_Mu12_IP6_part2
+	    || tree->HLT_Mu12_IP6_part3
+	    || tree->HLT_Mu12_IP6_part4
+	    || tree->HLT_Mu12_IP6_part5;
+	}
 	_HLT_BPHParking = _HLT_Mu8p5_IP3p5 || _HLT_Mu10p5_IP3p5 || _HLT_Mu9_IP6 || _HLT_Mu8_IP3;
+	if(isMC != 0) 	_HLT_BPHParking = _HLT_Mu8p5_IP3p5 || _HLT_Mu10p5_IP3p5 || _HLT_Mu9_IP6 || _HLT_Mu8_IP3 || 
+			 _HLT_Mu8_IP6 || _HLT_Mu8_IP5 || _HLT_Mu9_IP4 || _HLT_Mu7_IP4 || _HLT_Mu9_IP5 || _HLT_Mu12_IP6 ;
 
 	TLorentzVector mu;
-	mu.SetPtEtaPhiM(tree->Muon_pt[i_mu],tree->Muon_eta[i_mu],tree->Muon_phi[i_mu],tree->Muon_mass[i_mu]);
+	//mu.SetPtEtaPhiM(tree->Muon_pt[i_mu],tree->Muon_eta[i_mu],tree->Muon_phi[i_mu],tree->Muon_mass[i_mu]);
+	mu.SetPtEtaPhiM(tree->Muon_pt[i_mu],tree->Muon_eta[i_mu],tree->Muon_phi[i_mu],MuonMass_);
 
 	bool isTrigMatched = false;
 	int nTrigObj = tree->nTrigObj;
 	for(int i_trig = 0; i_trig<nTrigObj; i_trig++){
 	  if( tree->TrigObj_id[i_trig]==13 && ((tree->TrigObj_filterBits[i_trig])>>3)&1 ){
 	    TLorentzVector trig;
-	    trig.SetPtEtaPhiM(tree->TrigObj_pt[i_trig],tree->TrigObj_eta[i_trig],tree->TrigObj_phi[i_trig],0);
+	    trig.SetPtEtaPhiM(tree->TrigObj_pt[i_trig],tree->TrigObj_eta[i_trig],tree->TrigObj_phi[i_trig], MuonMass_);
 	    float dR = mu.DeltaR(trig);
-	    if(dR<0.01){
+	    if(dR < 0.01){
 	      isTrigMatched = true;
 	      break;
 	    }
 	  }
 	}
-
+	if(isTrigMatched && debug) {
+          ++nTriggeringMuons;
+	  std::cout << " mu HLT matched = " << i_mu << std::endl;
+        }
 	_Muon_isHLT_BPHParking[i_mu] = isTrigMatched;
     }
 
+    if(debug){
+    int nRecoMuons = 0;
+    int nRecoMuonsHLTMatched = 0;
+    ///check reco muon collection
+    for(int i_mu=0; i_mu<nMuon; i_mu++){
+      //muon passing soft ID + trigger matched                                                                                                                          
+      ++nRecoMuons;
+      std::cout << " tree->Muon_pt[i_mu] = " << tree->Muon_pt[i_mu] << " tree->Muon_charge[i_mu] = " << tree->Muon_charge[i_mu] 
+		<< " tree->Muon_eta[i_mu] = " << tree->Muon_eta[i_mu] << " tree->Muon_phi[i_mu] = " << tree->Muon_phi[i_mu] << std::endl;     
+      if(!tree->Muon_softId[i_mu] || tree->Muon_pt[i_mu] < genMuPtCut) continue;
+      if(isMC != 2 && !_Muon_isHLT_BPHParking[i_mu]) continue;
+      ++nRecoMuonsHLTMatched;
+    }
+    std::cout << " nTriggeringMuons = " << nTriggeringMuons << " nRecoMuons = " << nRecoMuons << " nRecoMuonsHLTMatched = " << nRecoMuonsHLTMatched << std::endl;
+    }
 
     //Select the BToKll candidate with reco criteria
 
@@ -371,25 +450,50 @@ int main(int argc, char **argv){
     std::vector<std::pair<int, float>> B_vtxCL_idx_val;
     _Muon_tag_index.resize(nBinTree);
 
+
+    if(debug) std::cout << " >>> nBinTree = " << nBinTree << std::endl;
+    int idxL1 = -1;
+    int idxL2 = -1;
     for(int i_Btree=0; i_Btree<nBinTree; ++i_Btree){            
 
-      //Disabled for now
-      //if(tree->BToKstll_kaon_charge[i_BToKmumu]*tree->Muon_charge[_Muon_sel_index]>0) continue; //Only consider BToKmumu with opposite charge to muon
-      
       //already applied in nanoAOD production
       if(tree->BToKstll_lep1_charge[i_Btree] * tree->BToKstll_lep2_charge[i_Btree] > 0.) continue;
 
       //consider triplet only if other trigger muon exists
       _Muon_sel_index = -1;
+      
+      //avoid rechecking extra muon match if same l1 and l2 as before
+      if(i_Btree > 0 && isLeptonTrack == 0 &&
+	 (idxL1 == tree->BToKstll_lep1_index[i_Btree] && idxL2 == tree->BToKstll_lep2_index[i_Btree])){
+	if(debug) std::cout << " looping i_Btree = " << i_Btree << " idxL1 = " << idxL1 << " idxL2 = " << idxL2 
+			    << " _Muon_tag_index[i_Btree-1] = " << _Muon_tag_index[i_Btree-1] << std::endl;
+	_Muon_tag_index[i_Btree] = _Muon_tag_index[i_Btree-1];
+	// idxL1 = tree->BToKstll_lep1_index[i_Btree];
+	// idxL2 = tree->BToKstll_lep2_index[i_Btree];
+	_Muon_sel_index = _Muon_tag_index[i_Btree-1];
+      }
+      else{
       for(int i_mu=0; i_mu<nMuon; i_mu++){
+
+	//to avoid rechecking the exact same lepton lepton combination
+	if(isLeptonTrack == 0){
+	  idxL1 = tree->BToKstll_lep1_index[i_Btree];
+	  idxL2 = tree->BToKstll_lep2_index[i_Btree];
+	}
+
+	if(debug) std::cout << " else looping i_Btree = " << i_Btree << " idxL1 = " << idxL1 << " idxL2 = " << idxL2 << std::endl;
+
 	//muon passing soft ID + trigger matched
 	if(!tree->Muon_softId[i_mu] || tree->Muon_pt[i_mu] < genMuPtCut) continue;
 	if(isMC != 2 && !_Muon_isHLT_BPHParking[i_mu]) continue;
 
+
 	//if lepton lepton just check index
 	if(isLeptonTrack == 0 && isEleFinalState == 0 &&
-	   (i_mu == tree->BToKstll_lep1_index[_BToKstll_sel_index] || i_mu == tree->BToKstll_lep2_index[_BToKstll_sel_index])) continue;
+	   (i_mu == tree->BToKstll_lep1_index[i_Btree] || i_mu == tree->BToKstll_lep2_index[i_Btree])) continue;
 	
+
+
 	//if tracks or electrons or is passed
 	//check dR for leading and subleading
 	
@@ -411,21 +515,30 @@ int main(int argc, char **argv){
 			       MuonMass_);
 	
 	float dR_lep1FromHLT = lep1_tlv.DeltaR(muHLT_tlv);
-	if(dR_lep1FromHLT < 0.02) continue;
 	float dR_lep2FromHLT = lep2_tlv.DeltaR(muHLT_tlv);
+
+	if(dR_lep1FromHLT < 0.02) continue;
 	if(dR_lep2FromHLT < 0.02) continue;
+
+	if(debug) std::cout << " >>> l1idx = " << tree->BToKstll_lep1_index[i_Btree]
+                            << " >>> l2idx = " << tree->BToKstll_lep2_index[i_Btree]
+                            << " muIdx = " << i_mu
+                            << std::endl;
 
 	//enough to find 1 extra muon matched to the trigger    
 	_Muon_sel_index = i_mu;
 	_Muon_tag_index[i_Btree] = i_mu;
+
 	break;
 	
       }//loop over muons
+      }
       /////////////////////
       //not found other reco muon matched to trigger for this triplet
       if(_Muon_sel_index == -1) {
 	_Muon_tag_index[i_Btree] = -1;
       }
+
 
       float B_CL_vtx = tree->BToKstll_B_CL_vtx[i_Btree];
       B_vtxCL_idx_val.push_back(std::pair<int, float>(i_Btree, B_CL_vtx));
@@ -434,7 +547,7 @@ int main(int argc, char **argv){
 	best_B_CL_vtx = B_CL_vtx;
 	_BToKstll_sel_index = i_Btree;
       }
-    }
+    }//loop over triplets
 
     std::sort(B_vtxCL_idx_val.begin(), B_vtxCL_idx_val.end(), comparePairs);
     int ipCount = 0;
@@ -444,6 +557,8 @@ int main(int argc, char **argv){
       ++ipCount;
     }
 
+    if(debug) std::cout << " >>> _BToKstll_sel_index = " << _BToKstll_sel_index << std::endl;
+
 
     //Take as tag muon leading soft ID muon + trigger-matched
     if(isMC == 0 && _BToKstll_sel_index<0) continue;
@@ -452,6 +567,8 @@ int main(int argc, char **argv){
     if(_BToKstll_sel_index>=0){
       _Muon_sel_index = _Muon_tag_index[_BToKstll_sel_index]; 
     }
+    if(debug)    std::cout << " iEntry = " << iEntry << " _Muon_sel_index = " << _Muon_sel_index << std::endl;
+
 
     //!!! Can have selected B->Kstll even without additional tag muons
     //Needs to ask both BToKstll_sel_index>=0 && Muon_sel_index>=0 for analysis on probe side

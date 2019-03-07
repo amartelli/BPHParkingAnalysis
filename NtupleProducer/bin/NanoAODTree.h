@@ -178,6 +178,49 @@ public :
    bool HLT_Mu8_IP3_part4;
    bool HLT_Mu8_IP3_part5;
 
+   //for MC
+   bool HLT_Mu8_IP6_part0;
+   bool HLT_Mu8_IP6_part1;
+   bool HLT_Mu8_IP6_part2;
+   bool HLT_Mu8_IP6_part3;
+   bool HLT_Mu8_IP6_part4;
+   bool HLT_Mu8_IP6_part5;
+
+   bool HLT_Mu8_IP5_part0;
+   bool HLT_Mu8_IP5_part1;
+   bool HLT_Mu8_IP5_part2;
+   bool HLT_Mu8_IP5_part3;
+   bool HLT_Mu8_IP5_part4;
+   bool HLT_Mu8_IP5_part5;
+
+   bool HLT_Mu9_IP4_part0;
+   bool HLT_Mu9_IP4_part1;
+   bool HLT_Mu9_IP4_part2;
+   bool HLT_Mu9_IP4_part3;
+   bool HLT_Mu9_IP4_part4;
+   bool HLT_Mu9_IP4_part5;
+
+   bool HLT_Mu7_IP4_part0;
+   bool HLT_Mu7_IP4_part1;
+   bool HLT_Mu7_IP4_part2;
+   bool HLT_Mu7_IP4_part3;
+   bool HLT_Mu7_IP4_part4;
+   bool HLT_Mu7_IP4_part5;
+
+   bool HLT_Mu9_IP5_part0;
+   bool HLT_Mu9_IP5_part1;
+   bool HLT_Mu9_IP5_part2;
+   bool HLT_Mu9_IP5_part3;
+   bool HLT_Mu9_IP5_part4;
+   bool HLT_Mu9_IP5_part5;
+
+   bool HLT_Mu12_IP6_part0;
+   bool HLT_Mu12_IP6_part1;
+   bool HLT_Mu12_IP6_part2;
+   bool HLT_Mu12_IP6_part3;
+   bool HLT_Mu12_IP6_part4;
+   bool HLT_Mu12_IP6_part5;
+
    uint nTrigObj;
    int TrigObj_id[kTrigObjMax];
    float TrigObj_pt[kTrigObjMax];
