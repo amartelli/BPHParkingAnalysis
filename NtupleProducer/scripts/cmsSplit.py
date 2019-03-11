@@ -153,7 +153,7 @@ def submitProduction():
         os.makedirs(outDir)
     #os.system('mkdir %s' %(outDir));
 
-    outLancia = open(currentDir+'/lanciaProd_'+opt.TAGNAME+'.sh', 'w')
+    outLancia = open(currentDir+'/launch_'+opt.TAGNAME+'.sh', 'w')
 
     for job in range(1,int(nJOBS)+1):
         subDir = outDir+"/JOB_"+str(job)
