@@ -27,8 +27,8 @@ float MuonMass_ = 0.10565837;
 float ElectronMass_ = 0.5109989e-3;
 
 
-float maxEtacceptance_ = 2.45; //2.4
-float minPtacceptance_ = 0.7;  //1.
+float maxEtacceptance_ = 2.6; //2.4
+float minPtacceptance_ = 0.2;  //1.
 
 bool comparePairs(const std::pair<int, float>& i, const std::pair<int, float>& j){
   return i.second > j.second;
@@ -202,12 +202,14 @@ int main(int argc, char **argv){
 
   //New branches
   int _BToKstll_sel_index = -1;
+  int _BToKstll_llsel_index = -1;
   std::vector<int> _BToKstll_order_index;
   int _Muon_sel_index = -1; //Probe muon with selection algo.
   std::vector<int> _Muon_tag_index; //Probe muon with selection algo.
   int _Muon_probe_index = -1; //Probe muon for Acc.xEff. = _Muon_sel_index in data
 
   tree_new->Branch("BToKstll_sel_index",&_BToKstll_sel_index,"BToKstll_sel_index/I");
+  tree_new->Branch("BToKstll_llsel_index",&_BToKstll_llsel_index,"BToKstll_llsel_index/I");
   tree_new->Branch("BToKstll_order_index", &_BToKstll_order_index);
   tree_new->Branch("Muon_sel_index",&_Muon_sel_index,"Muon_sel_index/I");
   tree_new->Branch("Muon_tag_index",&_Muon_tag_index);
@@ -295,6 +297,7 @@ int main(int argc, char **argv){
     if(iEntry%10000==0) std::cout << " Entry #" << iEntry << " " << int(100*float(iEntry)/nentries) << "%" << std::endl;
 
     _BToKstll_sel_index = -1;
+    _BToKstll_llsel_index = -1;
     _BToKstll_order_index.clear();
     _Muon_sel_index = -1;  //tag muon
     _Muon_tag_index.clear();
@@ -447,6 +450,7 @@ int main(int argc, char **argv){
 
     int nBinTree = tree->nBToKstll;
     float best_B_CL_vtx = -1.;
+    float best_Bll_CL_vtx = -1.;
     std::vector<std::pair<int, float>> B_vtxCL_idx_val;
     _Muon_tag_index.resize(nBinTree);
 
@@ -546,6 +550,11 @@ int main(int argc, char **argv){
       if( best_B_CL_vtx < 0. || B_CL_vtx>best_B_CL_vtx ){
 	best_B_CL_vtx = B_CL_vtx;
 	_BToKstll_sel_index = i_Btree;
+
+	if(tree->BToKstll_lep2_isPFLep[i_Btree] == 1 && (best_Bll_CL_vtx < 0. || B_CL_vtx > best_Bll_CL_vtx)){
+	  best_Bll_CL_vtx = B_CL_vtx;
+	  _BToKstll_llsel_index = i_Btree;
+	}
       }
     }//loop over triplets
 
@@ -730,7 +739,7 @@ int main(int argc, char **argv){
 
 	  //if( dR_lep1FromB <0.1 && dR_lep2FromB <0.1
 	  //  && 
-	  if(best_dR <0. || dR_tot < best_dR){
+	  if((best_dR <0. || dR_tot < best_dR) && dR_tot < 0.1){
 	    best_dR = dR_tot;
 	    _BToKstll_gen_index = i_Btree;
 	    _BToKstll_gendR_lep1FromB = dR_lep1FromB;
@@ -810,6 +819,7 @@ int main(int argc, char **argv){
 	     //	     gen_tagMu_tlv.Pt() > 5.){	     
 	     (gen_tagMu_tlv.Pt() > _BToKstll_gen_muonTag_hpT || _BToKstll_gen_muonTag_hpT == -1)){
 	    _BToKstll_gen_muonTag_hpT = gen_tagMu_tlv.Pt();
+	    _Muon_probe_index = i_gen;
 	    isTagMuonHighPt = true;
 	    //break;
 	  }
