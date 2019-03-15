@@ -27,7 +27,7 @@ float MuonMass_ = 0.10565837;
 float ElectronMass_ = 0.5109989e-3;
 
 
-float maxEtacceptance_ = 2.6; //2.4
+float maxEtacceptance_ = 2.5; //2.4
 float minPtacceptance_ = 0.2;  //1.
 
 bool comparePairs(const std::pair<int, float>& i, const std::pair<int, float>& j){
