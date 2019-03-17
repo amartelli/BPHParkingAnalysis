@@ -67,6 +67,7 @@ public :
    float BToKstll_lep2_pt[kBToKstllMax];
    float BToKstll_lep2_eta[kBToKstllMax];
    float BToKstll_lep2_phi[kBToKstllMax];
+   int BToKstll_lep2_isPFLep[kBToKstllMax];
    //int BToKstll_kaon_charge[kBToKstllMax];
    float BToKstll_kaon_pt[kBToKstllMax];
    float BToKstll_kaon_eta[kBToKstllMax];
