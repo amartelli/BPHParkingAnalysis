@@ -374,10 +374,16 @@ int main(int argc, char **argv){
   ULong64_t event = 0;
   
   //float nnBMX = -1;
-
+    
   int BToKstll_sel_index = -1;
-  int MuonTag_index = -1;
-  //int MuonRecoTag_index = -1;
+  int BToKstll_llsel_index = -1;
+  
+  std::vector<int>* Muon_tag_index = 0;
+  int Muon_sel_index = -1;
+  
+  int Muon_probe_index = -1;
+  
+  int BToKstll_lep2_isPFLep[kBToKstllMax];
   
   float BToKstll_B_pt[kBToKstllMax];
   float BToKstll_B_mass[kBToKstllMax];
@@ -432,8 +438,13 @@ int main(int argc, char **argv){
   t1->SetBranchStatus("event", 1);                      t1->SetBranchAddress("event", &event);
   
   t1->SetBranchStatus("BToKstll_sel_index", 1);         t1->SetBranchAddress("BToKstll_sel_index", &BToKstll_sel_index);
-  t1->SetBranchStatus("Muon_sel_index", 1);             t1->SetBranchAddress("Muon_sel_index", &MuonTag_index);
-
+  t1->SetBranchStatus("BToKstll_llsel_index", 1);       t1->SetBranchAddress("BToKstll_llsel_index", &BToKstll_llsel_index);
+  
+  t1->SetBranchStatus("Muon_tag_index", 1);             t1->SetBranchAddress("Muon_tag_index", &Muon_tag_index);
+  t1->SetBranchStatus("Muon_sel_index", 1);             t1->SetBranchAddress("Muon_sel_index", &Muon_sel_index);
+  
+  t1->SetBranchStatus("BToKstll_lep2_isPFLep", 1);      t1->SetBranchAddress("BToKstll_lep2_isPFLep", &BToKstll_lep2_isPFLep);  
+  
   t1->SetBranchStatus("BToKstll_B_pt", 1);              t1->SetBranchAddress("BToKstll_B_pt", &BToKstll_B_pt);
   t1->SetBranchStatus("BToKstll_B_mass", 1);            t1->SetBranchAddress("BToKstll_B_mass", &BToKstll_B_mass);
   t1->SetBranchStatus("BToKstll_B_cosAlpha", 1);        t1->SetBranchAddress("BToKstll_B_cosAlpha", &BToKstll_B_cosAlpha);
@@ -466,7 +477,8 @@ int main(int argc, char **argv){
   t1->SetBranchStatus("PFCand_dz", 1);                  t1->SetBranchAddress("PFCand_dz", &PFCand_dz);
 
   
-  if(dataset == "MC"){      
+  if(dataset == "MC"){ 
+    t1->SetBranchStatus("Muon_probe_index", 1);       t1->SetBranchAddress("Muon_probe_index", &Muon_probe_index);
     t1->SetBranchStatus("BToKstll_gen_index", 1);       t1->SetBranchAddress("BToKstll_gen_index", &BToKstll_gen_index);
     t1->SetBranchStatus("BToKstll_gendR_lep1FromB", 1); t1->SetBranchAddress("BToKstll_gendR_lep1FromB", &BToKstll_gendR_lep1FromB);
     t1->SetBranchStatus("BToKstll_gendR_lep2FromB", 1); t1->SetBranchAddress("BToKstll_gendR_lep2FromB", &BToKstll_gendR_lep2FromB);
@@ -475,7 +487,6 @@ int main(int argc, char **argv){
   
   
   if(isEleFinalState){    
-    //t1->SetBranchStatus("Muon_sel_index", 1);           t1->SetBranchAddress("Muon_sel_index", &MuonTag_index);
       
     t1->SetBranchStatus("Electron_pfRelIso03_all", 1);  t1->SetBranchAddress("Electron_pfRelIso03_all", &Lepton_pfRelIso03);
     t1->SetBranchStatus("Electron_pt", 1);              t1->SetBranchAddress("Electron_pt", &Lepton_pt);
@@ -485,8 +496,6 @@ int main(int argc, char **argv){
     t1->SetBranchStatus("Electron_dz", 1);              t1->SetBranchAddress("Electron_dz", &Lepton_dz);
   }
   else{    
-    //t1->SetBranchStatus("Muon_probe_index", 1);         t1->SetBranchAddress("Muon_probe_index", &MuonTag_index);
-    //t1->SetBranchStatus("Muon_sel_index", 1);           t1->SetBranchAddress("Muon_sel_index", &MuonRecoTag_index);  
       
     t1->SetBranchStatus("Muon_pfRelIso03_all", 1);      t1->SetBranchAddress("Muon_pfRelIso03_all", &Lepton_pfRelIso03);
     t1->SetBranchStatus("Muon_pfRelIso04_all", 1);      t1->SetBranchAddress("Muon_pfRelIso04_all", &Lepton_pfRelIso04);
@@ -632,22 +641,35 @@ int main(int argc, char **argv){
     if(iEvt%500000 == 0) std::cout << " >>> processing event " << iEvt << " " << 1.*iEvt/nEvts*100. << std::endl;
 
     t1->GetEntry(iEvt);
-
-    if(MuonTag_index == -1) continue;
-    //if(!isEleFinalState && MuonRecoTag_index == -1) continue;
+    
+    int muon_tag_index_event = -1;
+    int triplet_sel_index = -1;
+         
+    //if there is at least one llt triplet with tag muon, we pick it (whatever its rank is if LTT ntuples are analyzed)
+    if(BToKstll_llsel_index != -1){
+        triplet_sel_index = BToKstll_llsel_index;
+        muon_tag_index_event = Muon_tag_index->at(BToKstll_llsel_index);
+    } 
+    else{ 
+        triplet_sel_index = BToKstll_sel_index;
+        muon_tag_index_event = Muon_sel_index;
+    }
+            
+            
+    if(muon_tag_index_event != -1) continue;
+    if(dataset == "MC" && Muon_probe_index == -1) continue;
     ++nEv_muonTag[0];
-
-    if(BToKstll_sel_index == -1) continue; 
-    if(dataset == "MC" && BPHRun == "nnResonant" && BToKstll_sel_index != BToKstll_gen_index) continue;
-    if( dataset == "MC" && ( BToKstll_gendR_lep1FromB + BToKstll_gendR_lep2FromB + BToKstll_gendR_KFromB > 0.1 ) )continue;
-    ++nEv_recoCand[0]; 
-
+        
+    if(triplet_sel_index == -1)continue;
+    if(dataset == "MC" && BPHRun == "nnResonant" && triplet_sel_index != BToKstll_gen_index) continue;
+    ++nEv_recoCand[0];
+    
     //opposite sign leptons
-    if(BToKstll_lep1_charge[BToKstll_sel_index]*BToKstll_lep2_charge[BToKstll_sel_index] > 0.) continue;
+    if(BToKstll_lep1_charge[triplet_sel_index]*BToKstll_lep2_charge[triplet_sel_index] > 0.) continue;
     ++nEv_chargeSel[0];
 
     //misleading it's refit for Kmumu default for Kee
-    float llInvRefitMass = BToKstll_ll_mass[BToKstll_sel_index];
+    float llInvRefitMass = BToKstll_ll_mass[triplet_sel_index];
     int massBin = -1;
     for(unsigned int kl=0; kl<llMassBoundary.size()-1; ++kl){
       if(llInvRefitMass >= llMassBoundary[kl] && llInvRefitMass < llMassBoundary[kl+1]){
@@ -658,10 +680,10 @@ int main(int argc, char **argv){
 
     //to synch. with Riccardo ~ tight selection
     if(typeSelection == "tightCB"){
-      if((BToKstll_kaon_pt[BToKstll_sel_index] < 1.5 || BToKstll_B_pt[BToKstll_sel_index] < 10.)) continue;
-      if(BToKstll_B_cosAlpha[BToKstll_sel_index] < 0.999) continue;
-      if(BToKstll_B_CL_vtx[BToKstll_sel_index] < 0.1) continue;
-      if(BToKstll_B_Lxy[BToKstll_sel_index] < 6.) continue;
+      if((BToKstll_kaon_pt[triplet_sel_index] < 1.5 || BToKstll_B_pt[triplet_sel_index] < 10.)) continue;
+      if(BToKstll_B_cosAlpha[triplet_sel_index] < 0.999) continue;
+      if(BToKstll_B_CL_vtx[triplet_sel_index] < 0.1) continue;
+      if(BToKstll_B_Lxy[triplet_sel_index] < 6.) continue;
     }
 
     //MVA selection to get same background rejection as with the cut base
@@ -677,51 +699,51 @@ int main(int argc, char **argv){
     //save output ntuple with selected events fro final plots
     if(saveOUTntu){
         
-	Kstll_pt = BToKstll_B_pt[BToKstll_sel_index];     
-	Kstll_mass = BToKstll_B_mass[BToKstll_sel_index];
-	Kstll_cosAlpha = BToKstll_B_cosAlpha[BToKstll_sel_index];
-	Kstll_CL_vtx = BToKstll_B_CL_vtx[BToKstll_sel_index];
-	Kstll_Lxy = BToKstll_B_Lxy[BToKstll_sel_index];
-	Kstll_ctxy = BToKstll_B_ctxy[BToKstll_sel_index];
+	Kstll_pt = BToKstll_B_pt[triplet_sel_index];     
+	Kstll_mass = BToKstll_B_mass[triplet_sel_index];
+	Kstll_cosAlpha = BToKstll_B_cosAlpha[triplet_sel_index];
+	Kstll_CL_vtx = BToKstll_B_CL_vtx[triplet_sel_index];
+	Kstll_Lxy = BToKstll_B_Lxy[triplet_sel_index];
+	Kstll_ctxy = BToKstll_B_ctxy[triplet_sel_index];
     
-	Kstll_l1_pt = BToKstll_lep1_pt[BToKstll_sel_index];	
-	Kstll_l1_eta = BToKstll_lep1_eta[BToKstll_sel_index];
-	Kstll_l1_phi = BToKstll_lep1_phi[BToKstll_sel_index];
-	Kstll_l1_preFpt = Lepton_pt[BToKstll_lep1_index[BToKstll_sel_index]];
-	Kstll_l1_preFeta = Lepton_eta[BToKstll_lep1_index[BToKstll_sel_index]];
-	Kstll_l1_preFphi = Lepton_phi[BToKstll_lep1_index[BToKstll_sel_index]];
-	Kstll_l1_pfRelIso03 = Lepton_pfRelIso03[BToKstll_lep1_index[BToKstll_sel_index]];
-	Kstll_l1_dxy = Lepton_dxy[BToKstll_lep1_index[BToKstll_sel_index]];
-	Kstll_l1_dz = Lepton_dz[BToKstll_lep1_index[BToKstll_sel_index]];
+	Kstll_l1_pt = BToKstll_lep1_pt[triplet_sel_index];	
+	Kstll_l1_eta = BToKstll_lep1_eta[triplet_sel_index];
+	Kstll_l1_phi = BToKstll_lep1_phi[triplet_sel_index];
+	Kstll_l1_preFpt = Lepton_pt[BToKstll_lep1_index[triplet_sel_index]];
+	Kstll_l1_preFeta = Lepton_eta[BToKstll_lep1_index[triplet_sel_index]];
+	Kstll_l1_preFphi = Lepton_phi[BToKstll_lep1_index[triplet_sel_index]];
+	Kstll_l1_pfRelIso03 = Lepton_pfRelIso03[BToKstll_lep1_index[triplet_sel_index]];
+	Kstll_l1_dxy = Lepton_dxy[BToKstll_lep1_index[triplet_sel_index]];
+	Kstll_l1_dz = Lepton_dz[BToKstll_lep1_index[triplet_sel_index]];
     
-	Kstll_l2_pt = BToKstll_lep2_pt[BToKstll_sel_index];
-	Kstll_l2_eta = BToKstll_lep2_eta[BToKstll_sel_index];
-	Kstll_l2_phi = BToKstll_lep2_phi[BToKstll_sel_index];
-	Kstll_l2_preFpt = Lepton_pt[BToKstll_lep2_index[BToKstll_sel_index]];
-	Kstll_l2_preFeta = Lepton_eta[BToKstll_lep2_index[BToKstll_sel_index]];
-	Kstll_l2_preFphi = Lepton_phi[BToKstll_lep2_index[BToKstll_sel_index]];
-	Kstll_l2_pfRelIso03 = Lepton_pfRelIso03[BToKstll_lep2_index[BToKstll_sel_index]];
-	Kstll_l2_dxy = Lepton_dxy[BToKstll_lep2_index[BToKstll_sel_index]];
-	Kstll_l2_dz = Lepton_dz[BToKstll_lep2_index[BToKstll_sel_index]];
+	Kstll_l2_pt = BToKstll_lep2_pt[triplet_sel_index];
+	Kstll_l2_eta = BToKstll_lep2_eta[triplet_sel_index];
+	Kstll_l2_phi = BToKstll_lep2_phi[triplet_sel_index];
+	Kstll_l2_preFpt = Lepton_pt[BToKstll_lep2_index[triplet_sel_index]];
+	Kstll_l2_preFeta = Lepton_eta[BToKstll_lep2_index[triplet_sel_index]];
+	Kstll_l2_preFphi = Lepton_phi[BToKstll_lep2_index[triplet_sel_index]];
+	Kstll_l2_pfRelIso03 = Lepton_pfRelIso03[BToKstll_lep2_index[triplet_sel_index]];
+	Kstll_l2_dxy = Lepton_dxy[BToKstll_lep2_index[triplet_sel_index]];
+	Kstll_l2_dz = Lepton_dz[BToKstll_lep2_index[triplet_sel_index]];
 
 	if(isEleFinalState){
 	  Kstll_l1_pfRelIso04 = -1.;
 	  Kstll_l2_pfRelIso04 = -1.;
 	}
 	else{
-	Kstll_l1_pfRelIso04 = Lepton_pfRelIso04[BToKstll_lep1_index[BToKstll_sel_index]];
-	Kstll_l2_pfRelIso04 = Lepton_pfRelIso04[BToKstll_lep2_index[BToKstll_sel_index]];
+	Kstll_l1_pfRelIso04 = Lepton_pfRelIso04[BToKstll_lep1_index[triplet_sel_index]];
+	Kstll_l2_pfRelIso04 = Lepton_pfRelIso04[BToKstll_lep2_index[triplet_sel_index]];
 	}
 	
     Kstll_llRefitmass = llInvRefitMass;
 
-    Kstll_k_charge = BToKstll_kaon_charge[BToKstll_sel_index];
-	Kstll_k_pt = BToKstll_kaon_pt[BToKstll_sel_index];
-	Kstll_k_eta = BToKstll_kaon_eta[BToKstll_sel_index];
-	Kstll_k_phi = BToKstll_kaon_phi[BToKstll_sel_index];
-	Kstll_k_DCASig = BToKstll_kaon_DCASig[BToKstll_sel_index];
-	Kstll_k_dxy = PFCand_dxy[BToKstll_kaon_index[BToKstll_sel_index]];
-	Kstll_k_dz = PFCand_dz[BToKstll_kaon_index[BToKstll_sel_index]];
+    Kstll_k_charge = BToKstll_kaon_charge[triplet_sel_index];
+	Kstll_k_pt = BToKstll_kaon_pt[triplet_sel_index];
+	Kstll_k_eta = BToKstll_kaon_eta[triplet_sel_index];
+	Kstll_k_phi = BToKstll_kaon_phi[triplet_sel_index];
+	Kstll_k_DCASig = BToKstll_kaon_DCASig[triplet_sel_index];
+	Kstll_k_dxy = PFCand_dxy[BToKstll_kaon_index[triplet_sel_index]];
+	Kstll_k_dz = PFCand_dz[BToKstll_kaon_index[triplet_sel_index]];
 
 	newT->Fill();
     }
@@ -730,48 +752,48 @@ int main(int argc, char **argv){
     
     //histograms for each mass bin
     if(massBin != -1){
-      hAlpha[massBin]->Fill(BToKstll_B_cosAlpha[BToKstll_sel_index]);
-      hCLVtx[massBin]->Fill(BToKstll_B_CL_vtx[BToKstll_sel_index]);
-      hDCASig[massBin]->Fill(BToKstll_kaon_DCASig[BToKstll_sel_index]);
-      hLxy[massBin]->Fill(BToKstll_B_Lxy[BToKstll_sel_index]);
-      hctxy[massBin]->Fill(BToKstll_B_ctxy[BToKstll_sel_index]);
-      hKaonpt[massBin]->Fill(BToKstll_kaon_pt[BToKstll_sel_index]);
-      hBpt[massBin]->Fill(BToKstll_B_pt[BToKstll_sel_index]);
+      hAlpha[massBin]->Fill(BToKstll_B_cosAlpha[triplet_sel_index]);
+      hCLVtx[massBin]->Fill(BToKstll_B_CL_vtx[triplet_sel_index]);
+      hDCASig[massBin]->Fill(BToKstll_kaon_DCASig[triplet_sel_index]);
+      hLxy[massBin]->Fill(BToKstll_B_Lxy[triplet_sel_index]);
+      hctxy[massBin]->Fill(BToKstll_B_ctxy[triplet_sel_index]);
+      hKaonpt[massBin]->Fill(BToKstll_kaon_pt[triplet_sel_index]);
+      hBpt[massBin]->Fill(BToKstll_B_pt[triplet_sel_index]);
 
-      hLep1pt[massBin]->Fill(BToKstll_lep1_pt[BToKstll_sel_index]);
-      hLep2pt[massBin]->Fill(BToKstll_lep2_pt[BToKstll_sel_index]);
-      if(std::abs(BToKstll_lep1_eta[BToKstll_sel_index]) < 1.47) hLep1pt_EB[massBin]->Fill(BToKstll_lep1_pt[BToKstll_sel_index]);
-      else hLep1pt_EE[massBin]->Fill(BToKstll_lep1_pt[BToKstll_sel_index]);
-      if(std::abs(BToKstll_lep2_eta[BToKstll_sel_index]) < 1.47) hLep2pt_EB[massBin]->Fill(BToKstll_lep2_pt[BToKstll_sel_index]);
-      else hLep2pt_EE[massBin]->Fill(BToKstll_lep2_pt[BToKstll_sel_index]);
+      hLep1pt[massBin]->Fill(BToKstll_lep1_pt[triplet_sel_index]);
+      hLep2pt[massBin]->Fill(BToKstll_lep2_pt[triplet_sel_index]);
+      if(std::abs(BToKstll_lep1_eta[triplet_sel_index]) < 1.47) hLep1pt_EB[massBin]->Fill(BToKstll_lep1_pt[triplet_sel_index]);
+      else hLep1pt_EE[massBin]->Fill(BToKstll_lep1_pt[triplet_sel_index]);
+      if(std::abs(BToKstll_lep2_eta[triplet_sel_index]) < 1.47) hLep2pt_EB[massBin]->Fill(BToKstll_lep2_pt[triplet_sel_index]);
+      else hLep2pt_EE[massBin]->Fill(BToKstll_lep2_pt[triplet_sel_index]);
 
       hllRefitMass[massBin]->Fill(llInvRefitMass);
-      hllRefitMass_vs_Bmass[massBin]->Fill(BToKstll_B_mass[BToKstll_sel_index], llInvRefitMass);
-      hBmass[massBin]->Fill(BToKstll_B_mass[BToKstll_sel_index]);
+      hllRefitMass_vs_Bmass[massBin]->Fill(BToKstll_B_mass[triplet_sel_index], llInvRefitMass);
+      hBmass[massBin]->Fill(BToKstll_B_mass[triplet_sel_index]);
     }
     
     //histograms inclusive over all m(ll)
     hllRefitMass[6]->Fill(llInvRefitMass);
-    hllRefitMass_vs_Bmass[6]->Fill(BToKstll_B_mass[BToKstll_sel_index], llInvRefitMass);
-    hBmass[6]->Fill(BToKstll_B_mass[BToKstll_sel_index]);
+    hllRefitMass_vs_Bmass[6]->Fill(BToKstll_B_mass[triplet_sel_index], llInvRefitMass);
+    hBmass[6]->Fill(BToKstll_B_mass[triplet_sel_index]);
     
-    hAlpha[6]->Fill(BToKstll_B_cosAlpha[BToKstll_sel_index]);
-    hCLVtx[6]->Fill(BToKstll_B_CL_vtx[BToKstll_sel_index]);
-    hDCASig[6]->Fill(BToKstll_kaon_DCASig[BToKstll_sel_index]);
-    hLxy[6]->Fill(BToKstll_B_Lxy[BToKstll_sel_index]);
-    hctxy[6]->Fill(BToKstll_B_ctxy[BToKstll_sel_index]);
-    hKaonpt[6]->Fill(BToKstll_kaon_pt[BToKstll_sel_index]);
-    hBpt[6]->Fill(BToKstll_B_pt[BToKstll_sel_index]);
+    hAlpha[6]->Fill(BToKstll_B_cosAlpha[triplet_sel_index]);
+    hCLVtx[6]->Fill(BToKstll_B_CL_vtx[triplet_sel_index]);
+    hDCASig[6]->Fill(BToKstll_kaon_DCASig[triplet_sel_index]);
+    hLxy[6]->Fill(BToKstll_B_Lxy[triplet_sel_index]);
+    hctxy[6]->Fill(BToKstll_B_ctxy[triplet_sel_index]);
+    hKaonpt[6]->Fill(BToKstll_kaon_pt[triplet_sel_index]);
+    hBpt[6]->Fill(BToKstll_B_pt[triplet_sel_index]);
 
-    hLep1pt[6]->Fill(BToKstll_lep1_pt[BToKstll_sel_index]);
-    hLep2pt[6]->Fill(BToKstll_lep2_pt[BToKstll_sel_index]);
-    if(std::abs(BToKstll_lep1_eta[BToKstll_sel_index]) < 1.47) hLep1pt_EB[6]->Fill(BToKstll_lep1_pt[BToKstll_sel_index]);
-    else hLep1pt_EE[6]->Fill(BToKstll_lep1_pt[BToKstll_sel_index]);
-    if(std::abs(BToKstll_lep2_eta[BToKstll_sel_index]) < 1.47) hLep2pt_EB[6]->Fill(BToKstll_lep2_pt[BToKstll_sel_index]);
-    else hLep2pt_EE[6]->Fill(BToKstll_lep2_pt[BToKstll_sel_index]);
+    hLep1pt[6]->Fill(BToKstll_lep1_pt[triplet_sel_index]);
+    hLep2pt[6]->Fill(BToKstll_lep2_pt[triplet_sel_index]);
+    if(std::abs(BToKstll_lep1_eta[triplet_sel_index]) < 1.47) hLep1pt_EB[6]->Fill(BToKstll_lep1_pt[triplet_sel_index]);
+    else hLep1pt_EE[6]->Fill(BToKstll_lep1_pt[triplet_sel_index]);
+    if(std::abs(BToKstll_lep2_eta[triplet_sel_index]) < 1.47) hLep2pt_EB[6]->Fill(BToKstll_lep2_pt[triplet_sel_index]);
+    else hLep2pt_EE[6]->Fill(BToKstll_lep2_pt[triplet_sel_index]);
 
     /*
-    if(massBin == 3 && BToKstll_B_mass[BToKstll_sel_index] < 6.)
+    if(massBin == 3 && BToKstll_B_mass[triplet_sel_index] < 6.)
       std::cout << run << " " << lumi << " " << event << std::endl;
     */
   }//loop over events
@@ -816,3 +838,4 @@ int main(int argc, char **argv){
   outMassHistos.Close();
 
 }  
+ 
