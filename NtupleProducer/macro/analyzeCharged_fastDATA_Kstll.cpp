@@ -1,6 +1,6 @@
 //g++ -Wall -o analyzeCharged_fastDATA_Kstll `root-config --cflags --glibs` -lRooFitCore analyzeCharged_fastDATA_Kstll.cpp
 
-//./analyzeCharged_fastDATA_Kstll --isEle (0,1) --dataset (-1, runA, runB, runD, MC) --run (1,2,3,..., -1) --typeSelection (tightCB) --ntupleList (list.txt) --JOBid (1,2..) --outputFolder ("outfolder") --nMaxEvents (-1, N) --saveSelectedNTU (1,0) --outSelectedNTU (path for selected ntuples)
+//./analyzeCharged_fastDATA_Kstll --isEle (0,1) --dataset (-1, runA, runB, runD, MC) --run (1,2,3,..., -1) --typeSelection (tightCB) --ntupleList (list.txt) --JOBid (1,2..) --outputFolder ("outfolder") --nMaxEvents (-1, N) --saveSelectedNTU (1,0) --outSelectedNTU (path for selected ntuples) --testFile ("path")
 
 
 #include <iostream>
@@ -70,6 +70,7 @@ int main(int argc, char **argv){
   int nMaxEvents = -1;
   int saveOUTntu = 0;
   std::string outSelectedNTU = "-1";
+  std::string testFile = "-1";
   for (int i = 1; i < argc; ++i) {
     if(std::string(argv[i]) == "--isEle") {
       if (i + 1 < argc) {
@@ -170,11 +171,27 @@ int main(int argc, char **argv){
         return 1;
       }
     }
+  }  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "--testFile") {
+      if (i + 1 < argc) {
+        testFile = argv[i+1];
+        break;
+      } else {
+	std::cerr << " --testFile option requires one argument " << std::endl;
+        return 1;
+      }
+    }
   }
+
 
 
   if(ntupleList != "-1" && (JOBid == "-1" || outputFolder == "-1")){
     std::cout << " configuration ERROR => splitting file based but missing JOBid and output folder " << std::endl;
+    return -1;
+  }
+
+  if(ntupleList == "-1" && testFile == "-1"){
+    std::cout << " configuration ERROR => need a file list or a test file " << std::endl;
     return -1;
   }
 
@@ -208,7 +225,7 @@ int main(int argc, char **argv){
     }
   }
   else{
-    t1->Add("../bin/test.root");
+    t1->Add(testFile.c_str());
   }
 
   
