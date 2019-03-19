@@ -1,6 +1,6 @@
 //g++ -Wall -o analyzeCharged_fastDATA_Kstll `root-config --cflags --glibs` -lRooFitCore analyzeCharged_fastDATA_Kstll.cpp
 
-//./analyzeCharged_fastDATA_Kstll --isEle (0,1) --dataset (-1, runA, runB, runD, MC) --run (1,2,3,...) --typeSelection (tightCB) --ntupleList (list.txt) --JOBid (1,2..) --outputFolder ("outfolder") --nMaxEvents (-1, N) --saveSelectedNTU (1,0) --outSelectedNTU (path for selected ntuples)
+//./analyzeCharged_fastDATA_Kstll --isEle (0,1) --dataset (-1, runA, runB, runD, MC) --run (1,2,3,..., -1) --typeSelection (tightCB) --ntupleList (list.txt) --JOBid (1,2..) --outputFolder ("outfolder") --nMaxEvents (-1, N) --saveSelectedNTU (1,0) --outSelectedNTU (path for selected ntuples) --testFile ("path")
 
 
 #include <iostream>
@@ -45,7 +45,7 @@
 
 using namespace RooFit;
 
-const int kBToKstllMax = 50000;
+const int kBToKstllMax = 50;
 const int kMuonMax = 100;
 const int kPFCandMax = 10000;
 const int kGenPartMax = 10000;
@@ -70,6 +70,7 @@ int main(int argc, char **argv){
   int nMaxEvents = -1;
   int saveOUTntu = 0;
   std::string outSelectedNTU = "-1";
+  std::string testFile = "-1";
   for (int i = 1; i < argc; ++i) {
     if(std::string(argv[i]) == "--isEle") {
       if (i + 1 < argc) {
@@ -170,11 +171,27 @@ int main(int argc, char **argv){
         return 1;
       }
     }
+  }  for (int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "--testFile") {
+      if (i + 1 < argc) {
+        testFile = argv[i+1];
+        break;
+      } else {
+	std::cerr << " --testFile option requires one argument " << std::endl;
+        return 1;
+      }
+    }
   }
+
 
 
   if(ntupleList != "-1" && (JOBid == "-1" || outputFolder == "-1")){
     std::cout << " configuration ERROR => splitting file based but missing JOBid and output folder " << std::endl;
+    return -1;
+  }
+
+  if(ntupleList == "-1" && testFile == "-1"){
+    std::cout << " configuration ERROR => need a file list or a test file " << std::endl;
     return -1;
   }
 
@@ -207,71 +224,10 @@ int main(int argc, char **argv){
         }
     }
   }
-
-  //      To be updated                       
-  /* 
   else{
-    if(isEleFinalState){
-    
-        if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("");
-        if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("");
-        if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("");
-        if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("");
-        if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("");
-        if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("");
-        if((dataset == "runB" && BPHRun == "1") || dataset == "-1") t1->Add("");
-        if((dataset == "runB" && BPHRun == "2") || dataset == "-1") t1->Add("");
-        if((dataset == "runB" && BPHRun == "3") || dataset == "-1") t1->Add("");
-        if((dataset == "runB" && BPHRun == "4") || dataset == "-1") t1->Add("");
-        if((dataset == "runB" && BPHRun == "5") || dataset == "-1") t1->Add(""); 
-        
-        if((dataset == "runD" && BPHRun == "1") || dataset == "-1") t1->Add("");
-        if((dataset == "runD" && BPHRun == "2") || dataset == "-1") t1->Add("");
-        if((dataset == "runD" && BPHRun == "3") || dataset == "-1") t1->Add("");
-        if((dataset == "runD" && BPHRun == "4") || dataset == "-1") t1->Add("");
-        if((dataset == "runD" && BPHRun == "5") || dataset == "-1") t1->Add("");
-    
-        if(dataset == "MC" && BPHRun == "nnResonant"){
-            t1->Add("");
-        }
-    
-        if(dataset == "MC" && BPHRun == "Resonant"){
-            t1->Add("");
-        }
-    
-    }
-    else{
-    
-        if((dataset == "runA" && BPHRun == "1") || dataset == "-1") t1->Add("");
-        if((dataset == "runA" && BPHRun == "2") || dataset == "-1") t1->Add("");
-        if((dataset == "runA" && BPHRun == "3") || dataset == "-1") t1->Add("");
-        if((dataset == "runA" && BPHRun == "4") || dataset == "-1") t1->Add("");
-        if((dataset == "runA" && BPHRun == "5") || dataset == "-1") t1->Add("");
-        if((dataset == "runA" && BPHRun == "6") || dataset == "-1") t1->Add("");
-        if((dataset == "runB" && BPHRun == "1") || dataset == "-1") t1->Add("");
-        if((dataset == "runB" && BPHRun == "2") || dataset == "-1") t1->Add("");
-        if((dataset == "runB" && BPHRun == "3") || dataset == "-1") t1->Add("");
-        if((dataset == "runB" && BPHRun == "4") || dataset == "-1") t1->Add("");
-        if((dataset == "runB" && BPHRun == "5") || dataset == "-1") t1->Add("");       
-    
-        if((dataset == "runD" && BPHRun == "1") || dataset == "-1") t1->Add("");
-        if((dataset == "runD" && BPHRun == "2") || dataset == "-1") t1->Add("");
-        if((dataset == "runD" && BPHRun == "3") || dataset == "-1") t1->Add("");
-        if((dataset == "runD" && BPHRun == "4") || dataset == "-1") t1->Add("");
-        if((dataset == "runD" && BPHRun == "5") || dataset == "-1") t1->Add("");
-        
-        if(dataset == "MC" && BPHRun == "nnResonant"){
-            t1->Add("");
-        }
-    
-        if(dataset == "MC" && BPHRun == "Resonant"){
-            t1->Add("");
-        }
-        
-    }
-    
+    t1->Add(testFile.c_str());
   }
-  */
+
   
   int nEvts = t1->GetEntries();
   std::cout << " #initial n. events: " << nEvts << std::endl;
@@ -544,6 +500,8 @@ int main(int argc, char **argv){
   TH1F* hllRefitMass[7];  
   TH2F* hllRefitMass_vs_Bmass[7];
   TH1F* hBmass[7];
+  TH1F* hBmass_llt[7];
+  TH1F* hBmass_ltt[7];
 
   for(int ij=0; ij<7; ++ij){
     hAlpha[ij] = new TH1F(Form("hAlpha_%d", ij), "", 500, 0, 1.1);
@@ -580,6 +538,16 @@ int main(int argc, char **argv){
     hBmass[ij]->Sumw2();
     hBmass[ij]->SetLineColor(kRed);
     hBmass[ij]->SetLineWidth(2);
+
+    hBmass_llt[ij] = new TH1F(Form("Bmass_llt_%d", ij), "", 750, 0., 15.); // 75, 4.5, 6.);
+    hBmass_llt[ij]->Sumw2();
+    hBmass_llt[ij]->SetLineColor(kRed);
+    hBmass_llt[ij]->SetLineWidth(2);
+
+    hBmass_ltt[ij] = new TH1F(Form("Bmass_ltt_%d", ij), "", 750, 0., 15.); // 75, 4.5, 6.);
+    hBmass_ltt[ij]->Sumw2();
+    hBmass_ltt[ij]->SetLineColor(kRed);
+    hBmass_ltt[ij]->SetLineWidth(2);
 
     hctxy[ij] = new TH1F(Form("hctxy_%d", ij), "", 1000, 0., 10.);
     hctxy[ij]->Sumw2();
@@ -644,39 +612,34 @@ int main(int argc, char **argv){
     
     int muon_tag_index_event = -1;
     int triplet_sel_index = -1;
-         
+    bool isllt = false;         
+
     //if there is at least one llt triplet with tag muon, we pick it (whatever its rank is if LTT ntuples are analyzed)
     if(BToKstll_llsel_index != -1){
         triplet_sel_index = BToKstll_llsel_index;
         muon_tag_index_event = Muon_tag_index->at(BToKstll_llsel_index);
+	isllt = true;
     } 
     else{ 
         triplet_sel_index = BToKstll_sel_index;
         muon_tag_index_event = Muon_sel_index;
     }
             
+    //std::cout << " >>> BToKstll_sel_index = " << BToKstll_sel_index << " BToKstll_llsel_index = " << BToKstll_llsel_index << std::endl;
+
             
     if(muon_tag_index_event != -1) continue;
     if(dataset == "MC" && Muon_probe_index == -1) continue;
     ++nEv_muonTag[0];
         
     if(triplet_sel_index == -1)continue;
-    if(dataset == "MC" && BPHRun == "nnResonant" && triplet_sel_index != BToKstll_gen_index) continue;
+    if(dataset == "MC" && triplet_sel_index != BToKstll_gen_index) continue;
     ++nEv_recoCand[0];
     
     //opposite sign leptons
+    //expect eff 1 because opposite charge is already required at nanoAOD level
     if(BToKstll_lep1_charge[triplet_sel_index]*BToKstll_lep2_charge[triplet_sel_index] > 0.) continue;
     ++nEv_chargeSel[0];
-
-    //misleading it's refit for Kmumu default for Kee
-    float llInvRefitMass = BToKstll_ll_mass[triplet_sel_index];
-    int massBin = -1;
-    for(unsigned int kl=0; kl<llMassBoundary.size()-1; ++kl){
-      if(llInvRefitMass >= llMassBoundary[kl] && llInvRefitMass < llMassBoundary[kl+1]){
-	massBin = kl;
-	break;
-      }
-    }
 
     //to synch. with Riccardo ~ tight selection
     if(typeSelection == "tightCB"){
@@ -691,6 +654,18 @@ int main(int argc, char **argv){
 
     //MVA selection to get same signal efficiency as with the cut base
     //if(typeSelection == "NN_SigEff" && nnBMX < 0.998) continue;
+
+
+
+    //misleading: not refitted for Kmumu and Kee
+    float llInvRefitMass = BToKstll_ll_mass[triplet_sel_index];
+    int massBin = -1;
+    for(unsigned int kl=0; kl<llMassBoundary.size()-1; ++kl){
+      if(llInvRefitMass >= llMassBoundary[kl] && llInvRefitMass < llMassBoundary[kl+1]){
+	massBin = kl;
+	break;
+      }
+    }
 
     if(massBin != -1) ++nEv_selected[massBin];
     else ++nEv_selected[6];
@@ -735,9 +710,9 @@ int main(int argc, char **argv){
 	Kstll_l2_pfRelIso04 = Lepton_pfRelIso04[BToKstll_lep2_index[triplet_sel_index]];
 	}
 	
-    Kstll_llRefitmass = llInvRefitMass;
+	Kstll_llRefitmass = llInvRefitMass;
 
-    Kstll_k_charge = BToKstll_kaon_charge[triplet_sel_index];
+	Kstll_k_charge = BToKstll_kaon_charge[triplet_sel_index];
 	Kstll_k_pt = BToKstll_kaon_pt[triplet_sel_index];
 	Kstll_k_eta = BToKstll_kaon_eta[triplet_sel_index];
 	Kstll_k_phi = BToKstll_kaon_phi[triplet_sel_index];
@@ -770,12 +745,16 @@ int main(int argc, char **argv){
       hllRefitMass[massBin]->Fill(llInvRefitMass);
       hllRefitMass_vs_Bmass[massBin]->Fill(BToKstll_B_mass[triplet_sel_index], llInvRefitMass);
       hBmass[massBin]->Fill(BToKstll_B_mass[triplet_sel_index]);
+      if(isllt) hBmass_llt[massBin]->Fill(BToKstll_B_mass[triplet_sel_index]);
+      else hBmass_ltt[massBin]->Fill(BToKstll_B_mass[triplet_sel_index]);
     }
     
     //histograms inclusive over all m(ll)
     hllRefitMass[6]->Fill(llInvRefitMass);
     hllRefitMass_vs_Bmass[6]->Fill(BToKstll_B_mass[triplet_sel_index], llInvRefitMass);
     hBmass[6]->Fill(BToKstll_B_mass[triplet_sel_index]);
+    if(isllt) hBmass_llt[6]->Fill(BToKstll_B_mass[triplet_sel_index]);
+    else hBmass_ltt[6]->Fill(BToKstll_B_mass[triplet_sel_index]);
     
     hAlpha[6]->Fill(BToKstll_B_cosAlpha[triplet_sel_index]);
     hCLVtx[6]->Fill(BToKstll_B_CL_vtx[triplet_sel_index]);
@@ -828,6 +807,8 @@ int main(int argc, char **argv){
     hllRefitMass[ij]->Write(hllRefitMass[ij]->GetName());
     hllRefitMass_vs_Bmass[ij]->Write(hllRefitMass_vs_Bmass[ij]->GetName());
     hBmass[ij]->Write(hBmass[ij]->GetName());
+    hBmass_llt[ij]->Write(hBmass_llt[ij]->GetName());
+    hBmass_ltt[ij]->Write(hBmass_ltt[ij]->GetName());
 
     if(ij > 5) continue;
     std::cout << "\n massBin: " << llMassBoundary[ij] << " - " << llMassBoundary[ij+1]

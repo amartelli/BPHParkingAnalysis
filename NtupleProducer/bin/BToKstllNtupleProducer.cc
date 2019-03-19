@@ -285,7 +285,7 @@ int main(int argc, char **argv){
   
   for (int iEntry = 0; iEntry < nentries; ++iEntry){
     
-    bool debug = false;
+    bool debug = true;
     //if(iEntry == 419) debug = true;
 
     int out = tree->GetEntry(iEntry);
@@ -325,7 +325,7 @@ int main(int argc, char **argv){
     _HLT_Mu8_IP3 = false;
     _HLT_BPHParking = false;
     
-    //for MC
+    //for MC likely also for data
     _HLT_Mu8_IP6 = false;
     _HLT_Mu8_IP5 = false;
     _HLT_Mu9_IP4 = false;
@@ -364,47 +364,46 @@ int main(int argc, char **argv){
 	  || tree->HLT_Mu8_IP3_part3
 	  || tree->HLT_Mu8_IP3_part4
 	  || tree->HLT_Mu8_IP3_part5;
-	if(isMC != 0){
-	  _HLT_Mu8_IP6 = tree->HLT_Mu8_IP6_part0
-	    || tree->HLT_Mu8_IP6_part1
-	    || tree->HLT_Mu8_IP6_part2
-	    || tree->HLT_Mu8_IP6_part3
-	    || tree->HLT_Mu8_IP6_part4
-	    || tree->HLT_Mu8_IP6_part5;
-	  _HLT_Mu8_IP5 = tree->HLT_Mu8_IP5_part0
-	    || tree->HLT_Mu8_IP5_part1
-	    || tree->HLT_Mu8_IP5_part2
-	    || tree->HLT_Mu8_IP5_part3
-	    || tree->HLT_Mu8_IP5_part4
-	    || tree->HLT_Mu8_IP5_part5;
-	  _HLT_Mu9_IP4 = tree->HLT_Mu9_IP4_part0
-	    || tree->HLT_Mu9_IP4_part1
-	    || tree->HLT_Mu9_IP4_part2
-	    || tree->HLT_Mu9_IP4_part3
-	    || tree->HLT_Mu9_IP4_part4
-	    || tree->HLT_Mu9_IP4_part5;
-	  _HLT_Mu7_IP4 = tree->HLT_Mu7_IP4_part0
-	    || tree->HLT_Mu7_IP4_part1
-	    || tree->HLT_Mu7_IP4_part2
-	    || tree->HLT_Mu7_IP4_part3
-	    || tree->HLT_Mu7_IP4_part4
-	    || tree->HLT_Mu7_IP4_part5;
-	  _HLT_Mu9_IP5 = tree->HLT_Mu9_IP5_part0
-	    || tree->HLT_Mu9_IP5_part1
-	    || tree->HLT_Mu9_IP5_part2
-	    || tree->HLT_Mu9_IP5_part3
-	    || tree->HLT_Mu9_IP5_part4
-	    || tree->HLT_Mu9_IP5_part5;
-	  _HLT_Mu12_IP6 = tree->HLT_Mu12_IP6_part0
-	    || tree->HLT_Mu12_IP6_part1
-	    || tree->HLT_Mu12_IP6_part2
-	    || tree->HLT_Mu12_IP6_part3
-	    || tree->HLT_Mu12_IP6_part4
-	    || tree->HLT_Mu12_IP6_part5;
-	}
-	_HLT_BPHParking = _HLT_Mu8p5_IP3p5 || _HLT_Mu10p5_IP3p5 || _HLT_Mu9_IP6 || _HLT_Mu8_IP3;
-	if(isMC != 0) 	_HLT_BPHParking = _HLT_Mu8p5_IP3p5 || _HLT_Mu10p5_IP3p5 || _HLT_Mu9_IP6 || _HLT_Mu8_IP3 || 
-			 _HLT_Mu8_IP6 || _HLT_Mu8_IP5 || _HLT_Mu9_IP4 || _HLT_Mu7_IP4 || _HLT_Mu9_IP5 || _HLT_Mu12_IP6 ;
+	
+	_HLT_Mu8_IP6 = tree->HLT_Mu8_IP6_part0
+	  || tree->HLT_Mu8_IP6_part1
+	  || tree->HLT_Mu8_IP6_part2
+	  || tree->HLT_Mu8_IP6_part3
+	  || tree->HLT_Mu8_IP6_part4
+	  || tree->HLT_Mu8_IP6_part5;
+	_HLT_Mu8_IP5 = tree->HLT_Mu8_IP5_part0
+	  || tree->HLT_Mu8_IP5_part1
+	  || tree->HLT_Mu8_IP5_part2
+	  || tree->HLT_Mu8_IP5_part3
+	  || tree->HLT_Mu8_IP5_part4
+	  || tree->HLT_Mu8_IP5_part5;
+	_HLT_Mu9_IP4 = tree->HLT_Mu9_IP4_part0
+	  || tree->HLT_Mu9_IP4_part1
+	  || tree->HLT_Mu9_IP4_part2
+	  || tree->HLT_Mu9_IP4_part3
+	  || tree->HLT_Mu9_IP4_part4
+	  || tree->HLT_Mu9_IP4_part5;
+	_HLT_Mu7_IP4 = tree->HLT_Mu7_IP4_part0
+	  || tree->HLT_Mu7_IP4_part1
+	  || tree->HLT_Mu7_IP4_part2
+	  || tree->HLT_Mu7_IP4_part3
+	  || tree->HLT_Mu7_IP4_part4
+	  || tree->HLT_Mu7_IP4_part5;
+	_HLT_Mu9_IP5 = tree->HLT_Mu9_IP5_part0
+	  || tree->HLT_Mu9_IP5_part1
+	  || tree->HLT_Mu9_IP5_part2
+	  || tree->HLT_Mu9_IP5_part3
+	  || tree->HLT_Mu9_IP5_part4
+	  || tree->HLT_Mu9_IP5_part5;
+	_HLT_Mu12_IP6 = tree->HLT_Mu12_IP6_part0
+	  || tree->HLT_Mu12_IP6_part1
+	  || tree->HLT_Mu12_IP6_part2
+	  || tree->HLT_Mu12_IP6_part3
+	  || tree->HLT_Mu12_IP6_part4
+	  || tree->HLT_Mu12_IP6_part5;
+	
+	_HLT_BPHParking = (_HLT_Mu8p5_IP3p5 || _HLT_Mu10p5_IP3p5 || _HLT_Mu9_IP6 || _HLT_Mu8_IP3 || 
+			   _HLT_Mu8_IP6 || _HLT_Mu8_IP5 || _HLT_Mu9_IP4 || _HLT_Mu7_IP4 || _HLT_Mu9_IP5 || _HLT_Mu12_IP6 );
 
 	TLorentzVector mu;
 	//mu.SetPtEtaPhiM(tree->Muon_pt[i_mu],tree->Muon_eta[i_mu],tree->Muon_phi[i_mu],tree->Muon_mass[i_mu]);
@@ -551,6 +550,8 @@ int main(int argc, char **argv){
 	best_B_CL_vtx = B_CL_vtx;
 	_BToKstll_sel_index = i_Btree;
 
+	if(debug) std::cout << " >>> tree->BToKstll_lep2_isPFLep[i_Btree] = " << tree->BToKstll_lep2_isPFLep[i_Btree] 
+			    << " best_Bll_CL_vtx = " << best_Bll_CL_vtx << std::endl;
 	if(tree->BToKstll_lep2_isPFLep[i_Btree] == 1 && (best_Bll_CL_vtx < 0. || B_CL_vtx > best_Bll_CL_vtx)){
 	  best_Bll_CL_vtx = B_CL_vtx;
 	  _BToKstll_llsel_index = i_Btree;
@@ -566,7 +567,7 @@ int main(int argc, char **argv){
       ++ipCount;
     }
 
-    if(debug) std::cout << " >>> _BToKstll_sel_index = " << _BToKstll_sel_index << std::endl;
+    if(debug) std::cout << " >>> _BToKstll_sel_index = " << _BToKstll_sel_index << " _BToKstll_llsel_index = " << _BToKstll_llsel_index << std::endl;
 
 
     //Take as tag muon leading soft ID muon + trigger-matched
