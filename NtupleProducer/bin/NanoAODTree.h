@@ -308,6 +308,7 @@ void NanoAODTree::Init(TChain* tree)
     _tree->SetBranchAddress("BToKstll_lep2_pt",&BToKstll_lep2_pt);
     _tree->SetBranchAddress("BToKstll_lep2_eta",&BToKstll_lep2_eta);
     _tree->SetBranchAddress("BToKstll_lep2_phi",&BToKstll_lep2_phi);
+    _tree->SetBranchAddress("BToKstll_lep2_isPFLep",&BToKstll_lep2_isPFLep);
     //_tree->SetBranchAddress("BToKstll_kaon_charge",&BToKstll_kaon_charge);
     _tree->SetBranchAddress("BToKstll_kaon_pt",&BToKstll_kaon_pt);
     _tree->SetBranchAddress("BToKstll_kaon_eta",&BToKstll_kaon_eta);
