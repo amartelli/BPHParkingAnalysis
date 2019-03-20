@@ -27,7 +27,7 @@ float MuonMass_ = 0.10565837;
 float ElectronMass_ = 0.5109989e-3;
 
 
-float maxEtacceptance_ = 2.5; //2.4
+float maxEtacceptance_ = 2.6; //2.4
 float minPtacceptance_ = 0.2;  //1.
 
 bool comparePairs(const std::pair<int, float>& i, const std::pair<int, float>& j){
@@ -296,6 +296,8 @@ int main(int argc, char **argv){
 
     if(iEntry%10000==0) std::cout << " Entry #" << iEntry << " " << int(100*float(iEntry)/nentries) << "%" << std::endl;
 
+    if(debug)    std::cout << " iEntry = " << iEntry << std::endl;
+
     _BToKstll_sel_index = -1;
     _BToKstll_llsel_index = -1;
     _BToKstll_order_index.clear();
@@ -333,77 +335,82 @@ int main(int argc, char **argv){
     _HLT_Mu9_IP5 = false;
     _HLT_Mu12_IP6 = false;
 
-    //look for trigger muon
+    //initialize HLT paths
+    //Trigger selection + matching
+    _HLT_Mu8p5_IP3p5 = tree->HLT_Mu8p5_IP3p5_part0
+      || tree->HLT_Mu8p5_IP3p5_part1
+      || tree->HLT_Mu8p5_IP3p5_part2
+      || tree->HLT_Mu8p5_IP3p5_part3
+      || tree->HLT_Mu8p5_IP3p5_part4
+      || tree->HLT_Mu8p5_IP3p5_part5;
+    _HLT_Mu10p5_IP3p5 = tree->HLT_Mu10p5_IP3p5_part0
+      || tree->HLT_Mu10p5_IP3p5_part1
+      || tree->HLT_Mu10p5_IP3p5_part2
+      || tree->HLT_Mu10p5_IP3p5_part3
+      || tree->HLT_Mu10p5_IP3p5_part4
+      || tree->HLT_Mu10p5_IP3p5_part5;
+    _HLT_Mu9_IP6 = tree->HLT_Mu9_IP6_part0
+      || tree->HLT_Mu9_IP6_part1
+      || tree->HLT_Mu9_IP6_part2
+      || tree->HLT_Mu9_IP6_part3
+      || tree->HLT_Mu9_IP6_part4
+      || tree->HLT_Mu9_IP6_part5;
+    _HLT_Mu8_IP3 = tree->HLT_Mu8_IP3_part0
+      || tree->HLT_Mu8_IP3_part1
+      || tree->HLT_Mu8_IP3_part2
+      || tree->HLT_Mu8_IP3_part3
+      || tree->HLT_Mu8_IP3_part4
+      || tree->HLT_Mu8_IP3_part5;
+
+    _HLT_Mu8_IP6 = tree->HLT_Mu8_IP6_part0
+      || tree->HLT_Mu8_IP6_part1
+      || tree->HLT_Mu8_IP6_part2
+      || tree->HLT_Mu8_IP6_part3
+      || tree->HLT_Mu8_IP6_part4
+      || tree->HLT_Mu8_IP6_part5;
+    _HLT_Mu8_IP5 = tree->HLT_Mu8_IP5_part0
+      || tree->HLT_Mu8_IP5_part1
+      || tree->HLT_Mu8_IP5_part2
+      || tree->HLT_Mu8_IP5_part3
+      || tree->HLT_Mu8_IP5_part4
+      || tree->HLT_Mu8_IP5_part5;
+    _HLT_Mu9_IP4 = tree->HLT_Mu9_IP4_part0
+      || tree->HLT_Mu9_IP4_part1
+      || tree->HLT_Mu9_IP4_part2
+      || tree->HLT_Mu9_IP4_part3
+      || tree->HLT_Mu9_IP4_part4
+      || tree->HLT_Mu9_IP4_part5;
+    _HLT_Mu7_IP4 = tree->HLT_Mu7_IP4_part0
+      || tree->HLT_Mu7_IP4_part1
+      || tree->HLT_Mu7_IP4_part2
+      || tree->HLT_Mu7_IP4_part3
+      || tree->HLT_Mu7_IP4_part4
+      || tree->HLT_Mu7_IP4_part5;
+    _HLT_Mu9_IP5 = tree->HLT_Mu9_IP5_part0
+      || tree->HLT_Mu9_IP5_part1
+      || tree->HLT_Mu9_IP5_part2
+      || tree->HLT_Mu9_IP5_part3
+      || tree->HLT_Mu9_IP5_part4
+      || tree->HLT_Mu9_IP5_part5;
+    _HLT_Mu12_IP6 = tree->HLT_Mu12_IP6_part0
+      || tree->HLT_Mu12_IP6_part1
+      || tree->HLT_Mu12_IP6_part2
+      || tree->HLT_Mu12_IP6_part3
+      || tree->HLT_Mu12_IP6_part4
+      || tree->HLT_Mu12_IP6_part5;
+    
+    _HLT_BPHParking = (_HLT_Mu8p5_IP3p5 || _HLT_Mu10p5_IP3p5 || _HLT_Mu9_IP6 || _HLT_Mu8_IP3 || 
+		       _HLT_Mu8_IP6 || _HLT_Mu8_IP5 || _HLT_Mu9_IP4 || _HLT_Mu7_IP4 || _HLT_Mu9_IP5 || _HLT_Mu12_IP6 );
+    
+    
+    if(debug && (_HLT_Mu8_IP6 || _HLT_Mu8_IP5 || _HLT_Mu9_IP4 || _HLT_Mu7_IP4 || _HLT_Mu9_IP5 || _HLT_Mu12_IP6)
+       && !(_HLT_Mu8p5_IP3p5 || _HLT_Mu10p5_IP3p5 || _HLT_Mu9_IP6 || _HLT_Mu8_IP3)) std::cout << " extra paths " << std::endl;
+    
+
+    //now take trigger muon + matching
     int nMuon = tree->nMuon;
     int nTriggeringMuons = 0;
     for(int i_mu=0; i_mu<nMuon; i_mu++){
-
-
-      //Trigger selection + matching
-      _HLT_Mu8p5_IP3p5 = tree->HLT_Mu8p5_IP3p5_part0
-	  || tree->HLT_Mu8p5_IP3p5_part1
-	  || tree->HLT_Mu8p5_IP3p5_part2
-	  || tree->HLT_Mu8p5_IP3p5_part3
-	  || tree->HLT_Mu8p5_IP3p5_part4
-	  || tree->HLT_Mu8p5_IP3p5_part5;
-	_HLT_Mu10p5_IP3p5 = tree->HLT_Mu10p5_IP3p5_part0
-	  || tree->HLT_Mu10p5_IP3p5_part1
-	  || tree->HLT_Mu10p5_IP3p5_part2
-	  || tree->HLT_Mu10p5_IP3p5_part3
-	  || tree->HLT_Mu10p5_IP3p5_part4
-	  || tree->HLT_Mu10p5_IP3p5_part5;
-	_HLT_Mu9_IP6 = tree->HLT_Mu9_IP6_part0
-	  || tree->HLT_Mu9_IP6_part1
-	  || tree->HLT_Mu9_IP6_part2
-	  || tree->HLT_Mu9_IP6_part3
-	  || tree->HLT_Mu9_IP6_part4
-	  || tree->HLT_Mu9_IP6_part5;
-	_HLT_Mu8_IP3 = tree->HLT_Mu8_IP3_part0
-	  || tree->HLT_Mu8_IP3_part1
-	  || tree->HLT_Mu8_IP3_part2
-	  || tree->HLT_Mu8_IP3_part3
-	  || tree->HLT_Mu8_IP3_part4
-	  || tree->HLT_Mu8_IP3_part5;
-
-	_HLT_Mu8_IP6 = tree->HLT_Mu8_IP6_part0
-	  || tree->HLT_Mu8_IP6_part1
-	  || tree->HLT_Mu8_IP6_part2
-	  || tree->HLT_Mu8_IP6_part3
-	  || tree->HLT_Mu8_IP6_part4
-	  || tree->HLT_Mu8_IP6_part5;
-	_HLT_Mu8_IP5 = tree->HLT_Mu8_IP5_part0
-	  || tree->HLT_Mu8_IP5_part1
-	  || tree->HLT_Mu8_IP5_part2
-	  || tree->HLT_Mu8_IP5_part3
-	  || tree->HLT_Mu8_IP5_part4
-	  || tree->HLT_Mu8_IP5_part5;
-	_HLT_Mu9_IP4 = tree->HLT_Mu9_IP4_part0
-	  || tree->HLT_Mu9_IP4_part1
-	  || tree->HLT_Mu9_IP4_part2
-	  || tree->HLT_Mu9_IP4_part3
-	  || tree->HLT_Mu9_IP4_part4
-	  || tree->HLT_Mu9_IP4_part5;
-	_HLT_Mu7_IP4 = tree->HLT_Mu7_IP4_part0
-	  || tree->HLT_Mu7_IP4_part1
-	  || tree->HLT_Mu7_IP4_part2
-	  || tree->HLT_Mu7_IP4_part3
-	  || tree->HLT_Mu7_IP4_part4
-	  || tree->HLT_Mu7_IP4_part5;
-	_HLT_Mu9_IP5 = tree->HLT_Mu9_IP5_part0
-	  || tree->HLT_Mu9_IP5_part1
-	  || tree->HLT_Mu9_IP5_part2
-	  || tree->HLT_Mu9_IP5_part3
-	  || tree->HLT_Mu9_IP5_part4
-	  || tree->HLT_Mu9_IP5_part5;
-	_HLT_Mu12_IP6 = tree->HLT_Mu12_IP6_part0
-	  || tree->HLT_Mu12_IP6_part1
-	  || tree->HLT_Mu12_IP6_part2
-	  || tree->HLT_Mu12_IP6_part3
-	  || tree->HLT_Mu12_IP6_part4
-	  || tree->HLT_Mu12_IP6_part5;
-
-	_HLT_BPHParking = (_HLT_Mu8p5_IP3p5 || _HLT_Mu10p5_IP3p5 || _HLT_Mu9_IP6 || _HLT_Mu8_IP3 || 
-			   _HLT_Mu8_IP6 || _HLT_Mu8_IP5 || _HLT_Mu9_IP4 || _HLT_Mu7_IP4 || _HLT_Mu9_IP5 || _HLT_Mu12_IP6 );
 
 	TLorentzVector mu;
 	//mu.SetPtEtaPhiM(tree->Muon_pt[i_mu],tree->Muon_eta[i_mu],tree->Muon_phi[i_mu],tree->Muon_mass[i_mu]);
@@ -542,8 +549,8 @@ int main(int argc, char **argv){
 	_Muon_tag_index[i_Btree] = -1;
       }
 
-
-      float B_CL_vtx = tree->BToKstll_B_CL_vtx[i_Btree];
+      //RA change => only force rank among the triplet with extra trigger muon
+      float B_CL_vtx = tree->BToKstll_B_CL_vtx[i_Btree] + ((_Muon_sel_index == -1 ) ?  -1 : 0);
       B_vtxCL_idx_val.push_back(std::pair<int, float>(i_Btree, B_CL_vtx));
       
       if( best_B_CL_vtx < 0. || B_CL_vtx>best_B_CL_vtx ){
@@ -817,8 +824,7 @@ int main(int argc, char **argv){
 
 	  //In case there are several copies of same muon (with FSR for instance)
 	  if(gen_tagMu_tlv.DeltaR(gen_lep1FromB_tlv) > 0.01 && gen_tagMu_tlv.DeltaR(gen_lep2FromB_tlv) > 0.01 &&
-	     //	     gen_tagMu_tlv.Pt() > 5.){	     
-	     (gen_tagMu_tlv.Pt() > _BToKstll_gen_muonTag_hpT || _BToKstll_gen_muonTag_hpT == -1)){
+	     gen_tagMu_tlv.Pt() > genMuPtCut && gen_tagMu_tlv.Pt() > _BToKstll_gen_muonTag_hpT){
 	    _BToKstll_gen_muonTag_hpT = gen_tagMu_tlv.Pt();
 	    _Muon_probe_index = i_gen;
 	    isTagMuonHighPt = true;

@@ -625,16 +625,16 @@ int main(int argc, char **argv){
         muon_tag_index_event = Muon_sel_index;
     }
             
-    //std::cout << " >>> BToKstll_sel_index = " << BToKstll_sel_index << " BToKstll_llsel_index = " << BToKstll_llsel_index << std::endl;
-
             
-    if(muon_tag_index_event != -1) continue;
+    if(muon_tag_index_event == -1) continue;
     if(dataset == "MC" && Muon_probe_index == -1) continue;
     ++nEv_muonTag[0];
         
     if(triplet_sel_index == -1)continue;
     if(dataset == "MC" && triplet_sel_index != BToKstll_gen_index) continue;
     ++nEv_recoCand[0];
+
+
     
     //opposite sign leptons
     //expect eff 1 because opposite charge is already required at nanoAOD level
