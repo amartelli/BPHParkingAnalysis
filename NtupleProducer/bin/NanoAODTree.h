@@ -393,78 +393,74 @@ void NanoAODTree::Init(TChain* tree)
     _tree->SetBranchAddress("GenPart_phi",&GenPart_phi);
   }
 
-  int isBPHTrig = _tree->SetBranchAddress("HLT_Mu8p5_IP3p5_part0",&HLT_Mu8p5_IP3p5_part0);
-  if(isBPHTrig>=0){
-    _tree->SetBranchAddress("HLT_Mu8p5_IP3p5_part1",&HLT_Mu8p5_IP3p5_part1);
-    _tree->SetBranchAddress("HLT_Mu8p5_IP3p5_part2",&HLT_Mu8p5_IP3p5_part2);
-    _tree->SetBranchAddress("HLT_Mu8p5_IP3p5_part3",&HLT_Mu8p5_IP3p5_part3);
-    _tree->SetBranchAddress("HLT_Mu8p5_IP3p5_part4",&HLT_Mu8p5_IP3p5_part4);
-    _tree->SetBranchAddress("HLT_Mu8p5_IP3p5_part5",&HLT_Mu8p5_IP3p5_part5);
-    _tree->SetBranchAddress("HLT_Mu10p5_IP3p5_part0",&HLT_Mu10p5_IP3p5_part0);
-    _tree->SetBranchAddress("HLT_Mu10p5_IP3p5_part1",&HLT_Mu10p5_IP3p5_part1);
-    _tree->SetBranchAddress("HLT_Mu10p5_IP3p5_part2",&HLT_Mu10p5_IP3p5_part2);
-    _tree->SetBranchAddress("HLT_Mu10p5_IP3p5_part3",&HLT_Mu10p5_IP3p5_part3);
-    _tree->SetBranchAddress("HLT_Mu10p5_IP3p5_part4",&HLT_Mu10p5_IP3p5_part4);
-    _tree->SetBranchAddress("HLT_Mu10p5_IP3p5_part5",&HLT_Mu10p5_IP3p5_part5);
-    _tree->SetBranchAddress("HLT_Mu9_IP6_part0",&HLT_Mu9_IP6_part0);
-    _tree->SetBranchAddress("HLT_Mu9_IP6_part1",&HLT_Mu9_IP6_part1);
-    _tree->SetBranchAddress("HLT_Mu9_IP6_part2",&HLT_Mu9_IP6_part2);
-    _tree->SetBranchAddress("HLT_Mu9_IP6_part3",&HLT_Mu9_IP6_part3);
-    _tree->SetBranchAddress("HLT_Mu9_IP6_part4",&HLT_Mu9_IP6_part4);
-    _tree->SetBranchAddress("HLT_Mu9_IP6_part5",&HLT_Mu9_IP6_part5);
-    _tree->SetBranchAddress("HLT_Mu8_IP3_part0",&HLT_Mu8_IP3_part0);
-    _tree->SetBranchAddress("HLT_Mu8_IP3_part1",&HLT_Mu8_IP3_part1);
-    _tree->SetBranchAddress("HLT_Mu8_IP3_part2",&HLT_Mu8_IP3_part2);
-    _tree->SetBranchAddress("HLT_Mu8_IP3_part3",&HLT_Mu8_IP3_part3);
-    _tree->SetBranchAddress("HLT_Mu8_IP3_part4",&HLT_Mu8_IP3_part4);
-    _tree->SetBranchAddress("HLT_Mu8_IP3_part5",&HLT_Mu8_IP3_part5);
+  
+  _tree->SetBranchAddress("HLT_Mu8p5_IP3p5_part0",&HLT_Mu8p5_IP3p5_part0); 
+  _tree->SetBranchAddress("HLT_Mu8p5_IP3p5_part1",&HLT_Mu8p5_IP3p5_part1);
+  _tree->SetBranchAddress("HLT_Mu8p5_IP3p5_part2",&HLT_Mu8p5_IP3p5_part2);
+  _tree->SetBranchAddress("HLT_Mu8p5_IP3p5_part3",&HLT_Mu8p5_IP3p5_part3);
+  _tree->SetBranchAddress("HLT_Mu8p5_IP3p5_part4",&HLT_Mu8p5_IP3p5_part4);
+  _tree->SetBranchAddress("HLT_Mu8p5_IP3p5_part5",&HLT_Mu8p5_IP3p5_part5);
+  _tree->SetBranchAddress("HLT_Mu10p5_IP3p5_part0",&HLT_Mu10p5_IP3p5_part0);
+  _tree->SetBranchAddress("HLT_Mu10p5_IP3p5_part1",&HLT_Mu10p5_IP3p5_part1);
+  _tree->SetBranchAddress("HLT_Mu10p5_IP3p5_part2",&HLT_Mu10p5_IP3p5_part2);
+  _tree->SetBranchAddress("HLT_Mu10p5_IP3p5_part3",&HLT_Mu10p5_IP3p5_part3);
+  _tree->SetBranchAddress("HLT_Mu10p5_IP3p5_part4",&HLT_Mu10p5_IP3p5_part4);
+  _tree->SetBranchAddress("HLT_Mu10p5_IP3p5_part5",&HLT_Mu10p5_IP3p5_part5);
+  _tree->SetBranchAddress("HLT_Mu9_IP6_part0",&HLT_Mu9_IP6_part0);
+  _tree->SetBranchAddress("HLT_Mu9_IP6_part1",&HLT_Mu9_IP6_part1);
+  _tree->SetBranchAddress("HLT_Mu9_IP6_part2",&HLT_Mu9_IP6_part2);
+  _tree->SetBranchAddress("HLT_Mu9_IP6_part3",&HLT_Mu9_IP6_part3);
+  _tree->SetBranchAddress("HLT_Mu9_IP6_part4",&HLT_Mu9_IP6_part4);
+  _tree->SetBranchAddress("HLT_Mu9_IP6_part5",&HLT_Mu9_IP6_part5);
+  _tree->SetBranchAddress("HLT_Mu8_IP3_part0",&HLT_Mu8_IP3_part0);
+  _tree->SetBranchAddress("HLT_Mu8_IP3_part1",&HLT_Mu8_IP3_part1);
+  _tree->SetBranchAddress("HLT_Mu8_IP3_part2",&HLT_Mu8_IP3_part2);
+  _tree->SetBranchAddress("HLT_Mu8_IP3_part3",&HLT_Mu8_IP3_part3);
+  _tree->SetBranchAddress("HLT_Mu8_IP3_part4",&HLT_Mu8_IP3_part4);
+  _tree->SetBranchAddress("HLT_Mu8_IP3_part5",&HLT_Mu8_IP3_part5);
+  
+  _tree->SetBranchAddress("HLT_Mu8_IP6_part0",&HLT_Mu8_IP6_part0);
+  _tree->SetBranchAddress("HLT_Mu8_IP6_part1",&HLT_Mu8_IP6_part1);
+  _tree->SetBranchAddress("HLT_Mu8_IP6_part2",&HLT_Mu8_IP6_part2);
+  _tree->SetBranchAddress("HLT_Mu8_IP6_part3",&HLT_Mu8_IP6_part3);
+  _tree->SetBranchAddress("HLT_Mu8_IP6_part4",&HLT_Mu8_IP6_part4);
+  _tree->SetBranchAddress("HLT_Mu8_IP6_part5",&HLT_Mu8_IP6_part5);
+  
+  _tree->SetBranchAddress("HLT_Mu8_IP5_part0",&HLT_Mu8_IP5_part0);
+  _tree->SetBranchAddress("HLT_Mu8_IP5_part1",&HLT_Mu8_IP5_part1);
+  _tree->SetBranchAddress("HLT_Mu8_IP5_part2",&HLT_Mu8_IP5_part2);
+  _tree->SetBranchAddress("HLT_Mu8_IP5_part3",&HLT_Mu8_IP5_part3);
+  _tree->SetBranchAddress("HLT_Mu8_IP5_part4",&HLT_Mu8_IP5_part4);
+  _tree->SetBranchAddress("HLT_Mu8_IP5_part5",&HLT_Mu8_IP5_part5);
 
-
-    _tree->SetBranchAddress("HLT_Mu8_IP6_part0",&HLT_Mu8_IP6_part0);
-    _tree->SetBranchAddress("HLT_Mu8_IP6_part1",&HLT_Mu8_IP6_part1);
-    _tree->SetBranchAddress("HLT_Mu8_IP6_part2",&HLT_Mu8_IP6_part2);
-    _tree->SetBranchAddress("HLT_Mu8_IP6_part3",&HLT_Mu8_IP6_part3);
-    _tree->SetBranchAddress("HLT_Mu8_IP6_part4",&HLT_Mu8_IP6_part4);
-    _tree->SetBranchAddress("HLT_Mu8_IP6_part5",&HLT_Mu8_IP6_part5);
-
-    _tree->SetBranchAddress("HLT_Mu8_IP5_part0",&HLT_Mu8_IP5_part0);
-    _tree->SetBranchAddress("HLT_Mu8_IP5_part1",&HLT_Mu8_IP5_part1);
-    _tree->SetBranchAddress("HLT_Mu8_IP5_part2",&HLT_Mu8_IP5_part2);
-    _tree->SetBranchAddress("HLT_Mu8_IP5_part3",&HLT_Mu8_IP5_part3);
-    _tree->SetBranchAddress("HLT_Mu8_IP5_part4",&HLT_Mu8_IP5_part4);
-    _tree->SetBranchAddress("HLT_Mu8_IP5_part5",&HLT_Mu8_IP5_part5);
-
-    _tree->SetBranchAddress("HLT_Mu9_IP4_part0",&HLT_Mu9_IP4_part0);
-    _tree->SetBranchAddress("HLT_Mu9_IP4_part1",&HLT_Mu9_IP4_part1);
-    _tree->SetBranchAddress("HLT_Mu9_IP4_part2",&HLT_Mu9_IP4_part2);
-    _tree->SetBranchAddress("HLT_Mu9_IP4_part3",&HLT_Mu9_IP4_part3);
-    _tree->SetBranchAddress("HLT_Mu9_IP4_part4",&HLT_Mu9_IP4_part4);
-    _tree->SetBranchAddress("HLT_Mu9_IP4_part5",&HLT_Mu9_IP4_part5);
-
-   _tree->SetBranchAddress("HLT_Mu7_IP4_part0",&HLT_Mu7_IP4_part0);
-   _tree->SetBranchAddress("HLT_Mu7_IP4_part1",&HLT_Mu7_IP4_part1);
-   _tree->SetBranchAddress("HLT_Mu7_IP4_part2",&HLT_Mu7_IP4_part2);
-   _tree->SetBranchAddress("HLT_Mu7_IP4_part3",&HLT_Mu7_IP4_part3);
-   _tree->SetBranchAddress("HLT_Mu7_IP4_part4",&HLT_Mu7_IP4_part4);
-   _tree->SetBranchAddress("HLT_Mu7_IP4_part5",&HLT_Mu7_IP4_part5);
-
-   _tree->SetBranchAddress("HLT_Mu9_IP5_part0",&HLT_Mu9_IP5_part0);
-   _tree->SetBranchAddress("HLT_Mu9_IP5_part1",&HLT_Mu9_IP5_part1);
-   _tree->SetBranchAddress("HLT_Mu9_IP5_part2",&HLT_Mu9_IP5_part2);
-   _tree->SetBranchAddress("HLT_Mu9_IP5_part3",&HLT_Mu9_IP5_part3);
-   _tree->SetBranchAddress("HLT_Mu9_IP5_part4",&HLT_Mu9_IP5_part4);
-   _tree->SetBranchAddress("HLT_Mu9_IP5_part5",&HLT_Mu9_IP5_part5);
-
-   _tree->SetBranchAddress("HLT_Mu12_IP6_part0",&HLT_Mu12_IP6_part0);
-   _tree->SetBranchAddress("HLT_Mu12_IP6_part1",&HLT_Mu12_IP6_part1);
-   _tree->SetBranchAddress("HLT_Mu12_IP6_part2",&HLT_Mu12_IP6_part2);
-   _tree->SetBranchAddress("HLT_Mu12_IP6_part3",&HLT_Mu12_IP6_part3);
-   _tree->SetBranchAddress("HLT_Mu12_IP6_part4",&HLT_Mu12_IP6_part4);
-   _tree->SetBranchAddress("HLT_Mu12_IP6_part5",&HLT_Mu12_IP6_part5);
-
-
-  }
-
+  _tree->SetBranchAddress("HLT_Mu9_IP4_part0",&HLT_Mu9_IP4_part0);
+  _tree->SetBranchAddress("HLT_Mu9_IP4_part1",&HLT_Mu9_IP4_part1);
+  _tree->SetBranchAddress("HLT_Mu9_IP4_part2",&HLT_Mu9_IP4_part2);
+  _tree->SetBranchAddress("HLT_Mu9_IP4_part3",&HLT_Mu9_IP4_part3);
+  _tree->SetBranchAddress("HLT_Mu9_IP4_part4",&HLT_Mu9_IP4_part4);
+  _tree->SetBranchAddress("HLT_Mu9_IP4_part5",&HLT_Mu9_IP4_part5);
+  
+  _tree->SetBranchAddress("HLT_Mu7_IP4_part0",&HLT_Mu7_IP4_part0);
+  _tree->SetBranchAddress("HLT_Mu7_IP4_part1",&HLT_Mu7_IP4_part1);
+  _tree->SetBranchAddress("HLT_Mu7_IP4_part2",&HLT_Mu7_IP4_part2);
+  _tree->SetBranchAddress("HLT_Mu7_IP4_part3",&HLT_Mu7_IP4_part3);
+  _tree->SetBranchAddress("HLT_Mu7_IP4_part4",&HLT_Mu7_IP4_part4);
+  _tree->SetBranchAddress("HLT_Mu7_IP4_part5",&HLT_Mu7_IP4_part5);
+  
+  _tree->SetBranchAddress("HLT_Mu9_IP5_part0",&HLT_Mu9_IP5_part0);
+  _tree->SetBranchAddress("HLT_Mu9_IP5_part1",&HLT_Mu9_IP5_part1);
+  _tree->SetBranchAddress("HLT_Mu9_IP5_part2",&HLT_Mu9_IP5_part2);
+  _tree->SetBranchAddress("HLT_Mu9_IP5_part3",&HLT_Mu9_IP5_part3);
+  _tree->SetBranchAddress("HLT_Mu9_IP5_part4",&HLT_Mu9_IP5_part4);
+  _tree->SetBranchAddress("HLT_Mu9_IP5_part5",&HLT_Mu9_IP5_part5);
+  
+  _tree->SetBranchAddress("HLT_Mu12_IP6_part0",&HLT_Mu12_IP6_part0);
+  _tree->SetBranchAddress("HLT_Mu12_IP6_part1",&HLT_Mu12_IP6_part1);
+  _tree->SetBranchAddress("HLT_Mu12_IP6_part2",&HLT_Mu12_IP6_part2);
+  _tree->SetBranchAddress("HLT_Mu12_IP6_part3",&HLT_Mu12_IP6_part3);
+  _tree->SetBranchAddress("HLT_Mu12_IP6_part4",&HLT_Mu12_IP6_part4);
+  _tree->SetBranchAddress("HLT_Mu12_IP6_part5",&HLT_Mu12_IP6_part5);
+  
   _tree->SetBranchAddress("nTrigObj",&nTrigObj);
   _tree->SetBranchAddress("TrigObj_id",&TrigObj_id);
   _tree->SetBranchAddress("TrigObj_pt",&TrigObj_pt);
