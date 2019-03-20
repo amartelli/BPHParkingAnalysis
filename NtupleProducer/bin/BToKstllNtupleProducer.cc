@@ -285,7 +285,7 @@ int main(int argc, char **argv){
   
   for (int iEntry = 0; iEntry < nentries; ++iEntry){
     
-    bool debug = true;
+    bool debug = false;
     //if(iEntry == 419) debug = true;
 
     int out = tree->GetEntry(iEntry);
@@ -364,7 +364,7 @@ int main(int argc, char **argv){
 	  || tree->HLT_Mu8_IP3_part3
 	  || tree->HLT_Mu8_IP3_part4
 	  || tree->HLT_Mu8_IP3_part5;
-	
+
 	_HLT_Mu8_IP6 = tree->HLT_Mu8_IP6_part0
 	  || tree->HLT_Mu8_IP6_part1
 	  || tree->HLT_Mu8_IP6_part2
@@ -401,7 +401,7 @@ int main(int argc, char **argv){
 	  || tree->HLT_Mu12_IP6_part3
 	  || tree->HLT_Mu12_IP6_part4
 	  || tree->HLT_Mu12_IP6_part5;
-	
+
 	_HLT_BPHParking = (_HLT_Mu8p5_IP3p5 || _HLT_Mu10p5_IP3p5 || _HLT_Mu9_IP6 || _HLT_Mu8_IP3 || 
 			   _HLT_Mu8_IP6 || _HLT_Mu8_IP5 || _HLT_Mu9_IP4 || _HLT_Mu7_IP4 || _HLT_Mu9_IP5 || _HLT_Mu12_IP6 );
 
