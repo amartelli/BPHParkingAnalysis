@@ -634,8 +634,6 @@ int main(int argc, char **argv){
     if(dataset == "MC" && triplet_sel_index != BToKstll_gen_index) continue;
     ++nEv_recoCand[0];
 
-    std::cout << " event " << iEvt << " >>> BToKstll_sel_index = " << BToKstll_sel_index << " BToKstll_llsel_index = " << BToKstll_llsel_index 
-	      << " Muon_sel_index = " << Muon_sel_index << " muon_tag_index_event = " << muon_tag_index_event << " isllt = " << isllt << std::endl;
 
     
     //opposite sign leptons

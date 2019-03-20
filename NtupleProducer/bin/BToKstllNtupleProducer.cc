@@ -550,7 +550,7 @@ int main(int argc, char **argv){
       }
 
       //RA change => only force rank among the triplet with extra trigger muon
-      float B_CL_vtx = tree->BToKstll_B_CL_vtx[i_Btree] + (_Muon_sel_index == -1 ) ?  -1 : 0;
+      float B_CL_vtx = tree->BToKstll_B_CL_vtx[i_Btree] + ((_Muon_sel_index == -1 ) ?  -1 : 0);
       B_vtxCL_idx_val.push_back(std::pair<int, float>(i_Btree, B_CL_vtx));
       
       if( best_B_CL_vtx < 0. || B_CL_vtx>best_B_CL_vtx ){
