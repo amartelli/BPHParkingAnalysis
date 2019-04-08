@@ -639,6 +639,9 @@ int main(int argc, char **argv){
     }
             
     if(BToKstll_isLowPtEle){
+      muon_tag_index_event = -1;
+      triplet_sel_index = -1;
+
       std::vector<std::pair<int, int>> posRank;
       for(unsigned int iPos = 0; iPos<BToKstll_order_index->size(); ++iPos)
 	posRank.push_back(std::pair<int, int>(iPos, BToKstll_order_index->at(iPos)));
@@ -648,7 +651,8 @@ int main(int argc, char **argv){
 		  return i.second < j.second; });     
 
       for(auto rank:posRank){
-	if(BToKstll_lep2_seedBDT_unbiased[rank.first] > 4 && Muon_tag_index->at(rank.first) != -1){
+	if(BToKstll_lep2_seedBDT_unbiased[rank.first] > 4 && Muon_tag_index->at(rank.first) != -1 &&
+	   BToKstll_lep1_pt[rank.first] > 2. && BToKstll_lep2_pt[rank.first] > 2.){
 	  triplet_sel_index = rank.first;
 	  muon_tag_index_event = Muon_tag_index->at(rank.first);
 	  break;
