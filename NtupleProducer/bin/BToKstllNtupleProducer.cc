@@ -570,7 +570,7 @@ int main(int argc, char **argv){
     int ipCount = 0;
     _BToKstll_order_index.resize(B_vtxCL_idx_val.size());
     for(auto ip : B_vtxCL_idx_val){
-      _BToKstll_order_index[ip.first] = ipCount;
+      _BToKstll_order_index[ipCount] = ip.first;
       ++ipCount;
     }
 
