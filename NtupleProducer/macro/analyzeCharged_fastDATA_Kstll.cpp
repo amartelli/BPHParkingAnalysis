@@ -333,20 +333,14 @@ int main(int argc, char **argv){
     
   int BToKstll_sel_index = -1;
   int BToKstll_llsel_index = -1;
-  std::vector<int>* BToKstll_order_index = 0;
   
   std::vector<int>* Muon_tag_index = 0;
   int Muon_sel_index = -1;
+  
   int Muon_probe_index = -1;
   
   int BToKstll_lep2_isPFLep[kBToKstllMax];
-  int BToKstll_isLowPtEle[kBToKstllMax];
   
-  float BToKstll_lep1_seedBDT_unbiased[kBToKstllMax];
-  float BToKstll_lep1_seedBDT_ptbiased[kBToKstllMax];
-  float BToKstll_lep2_seedBDT_unbiased[kBToKstllMax];
-  float BToKstll_lep2_seedBDT_ptbiased[kBToKstllMax];
-
   float BToKstll_B_pt[kBToKstllMax];
   float BToKstll_B_mass[kBToKstllMax];
   float BToKstll_B_cosAlpha[kBToKstllMax];
@@ -401,19 +395,12 @@ int main(int argc, char **argv){
   
   t1->SetBranchStatus("BToKstll_sel_index", 1);         t1->SetBranchAddress("BToKstll_sel_index", &BToKstll_sel_index);
   t1->SetBranchStatus("BToKstll_llsel_index", 1);       t1->SetBranchAddress("BToKstll_llsel_index", &BToKstll_llsel_index);
-  t1->SetBranchStatus("BToKstll_order_index", 1);       t1->SetBranchAddress("BToKstll_order_index", &BToKstll_order_index);
-
+  
   t1->SetBranchStatus("Muon_tag_index", 1);             t1->SetBranchAddress("Muon_tag_index", &Muon_tag_index);
   t1->SetBranchStatus("Muon_sel_index", 1);             t1->SetBranchAddress("Muon_sel_index", &Muon_sel_index);
   
   t1->SetBranchStatus("BToKstll_lep2_isPFLep", 1);      t1->SetBranchAddress("BToKstll_lep2_isPFLep", &BToKstll_lep2_isPFLep);  
-  t1->SetBranchStatus("BToKstll_isLowPtEle", 1);        t1->SetBranchAddress("BToKstll_isLowPtEle", &BToKstll_isLowPtEle);  
   
-  t1->SetBranchStatus("BToKstll_lep1_seedBDT_unbiased", 1);   t1->SetBranchAddress("BToKstll_lep1_seedBDT_unbiased", &BToKstll_lep1_seedBDT_unbiased);
-  t1->SetBranchStatus("BToKstll_lep1_seedBDT_ptbiased", 1);   t1->SetBranchAddress("BToKstll_lep1_seedBDT_ptbiased", &BToKstll_lep1_seedBDT_ptbiased);
-  t1->SetBranchStatus("BToKstll_lep2_seedBDT_unbiased", 1);   t1->SetBranchAddress("BToKstll_lep2_seedBDT_unbiased", &BToKstll_lep2_seedBDT_unbiased);
-  t1->SetBranchStatus("BToKstll_lep2_seedBDT_ptbiased", 1);   t1->SetBranchAddress("BToKstll_lep2_seedBDT_ptbiased", &BToKstll_lep2_seedBDT_ptbiased);
-
   t1->SetBranchStatus("BToKstll_B_pt", 1);              t1->SetBranchAddress("BToKstll_B_pt", &BToKstll_B_pt);
   t1->SetBranchStatus("BToKstll_B_mass", 1);            t1->SetBranchAddress("BToKstll_B_mass", &BToKstll_B_mass);
   t1->SetBranchStatus("BToKstll_B_cosAlpha", 1);        t1->SetBranchAddress("BToKstll_B_cosAlpha", &BToKstll_B_cosAlpha);
@@ -638,24 +625,6 @@ int main(int argc, char **argv){
         muon_tag_index_event = Muon_sel_index;
     }
             
-    if(BToKstll_isLowPtEle){
-      std::vector<std::pair<int, int>> posRank;
-      for(unsigned int iPos = 0; iPos<BToKstll_order_index->size(); ++iPos)
-	posRank.push_back(std::pair<int, int>(iPos, BToKstll_order_index->at(iPos)));
-      
-      std::sort(posRank.begin(), posRank.end(), 
-		[](const std::pair<int, float>& i, const std::pair<int, float>& j) {
-		  return i.second < j.second; });     
-
-      for(auto rank:posRank){
-	if(BToKstll_lep2_seedBDT_unbiased[rank.first] > 4 && Muon_tag_index->at(rank.first) != -1){
-	  triplet_sel_index = rank.first;
-	  muon_tag_index_event = Muon_tag_index->at(rank.first);
-	  break;
-	}
-      }
-    }
-
             
     if(muon_tag_index_event == -1) continue;
     if(dataset == "MC" && Muon_probe_index == -1) continue;
