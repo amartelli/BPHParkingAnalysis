@@ -1,6 +1,6 @@
-//g++ -Wall -o analyzeCharged_fastDATA_Kstll `root-config --cflags --glibs` -lRooFitCore analyzeCharged_fastDATA_Kstll.cpp
+//g++ -Wall -o analyzeCharged_fastDATA_Kstll_testBDTpT `root-config --cflags --glibs` -lRooFitCore analyzeCharged_fastDATA_Kstll_testBDTpT.cpp
 
-//./analyzeCharged_fastDATA_Kstll --isEle (0,1) --dataset (-1, runA, runB, runD, MC) --run (1,2,3,..., -1) --typeSelection (tightCB) --ntupleList (list.txt) --JOBid (1,2..) --outputFolder ("outfolder") --nMaxEvents (-1, N) --saveSelectedNTU (1,0) --outSelectedNTU (path for selected ntuples) --testFile ("path")
+//./analyzeCharged_fastDATA_Kstll_testBDTpT --isEle (0,1) --dataset (-1, runA, runB, runD, MC) --run (1,2,3,..., -1) --typeSelection (tightCB) --ntupleList (list.txt) --JOBid (1,2..) --outputFolder ("outfolder") --nMaxEvents (-1, N) --saveSelectedNTU (1,0) --outSelectedNTU (path for selected ntuples) --testFile ("path")
 
 
 #include <iostream>
@@ -53,6 +53,10 @@ const float ElectronMass = 0.5109989e-3;
 const float MuonMass = 0.10565837;
 const float KaonMass = 0.493677;
 const float PionMass = 0.139570;
+
+const float lep1_pT_cut = 2.;
+const float lep2_pT_cut = 2.;
+const float lep2_seedBDT_unbiased = 4.;
 
 int main(int argc, char **argv){
 
@@ -331,8 +335,8 @@ int main(int argc, char **argv){
   
   //float nnBMX = -1;
     
-  int BToKstll_sel_index = -1;
-  int BToKstll_llsel_index = -1;
+  //int BToKstll_sel_index = -1;
+  //int BToKstll_llsel_index = -1;
   std::vector<int>* BToKstll_order_index = 0;
   
   std::vector<int>* Muon_tag_index = 0;
@@ -399,15 +403,16 @@ int main(int argc, char **argv){
   t1->SetBranchStatus("luminosityBlock", 1);            t1->SetBranchAddress("luminosityBlock", &lumi);
   t1->SetBranchStatus("event", 1);                      t1->SetBranchAddress("event", &event);
   
-  t1->SetBranchStatus("BToKstll_sel_index", 1);         t1->SetBranchAddress("BToKstll_sel_index", &BToKstll_sel_index);
-  t1->SetBranchStatus("BToKstll_llsel_index", 1);       t1->SetBranchAddress("BToKstll_llsel_index", &BToKstll_llsel_index);
+  //t1->SetBranchStatus("BToKstll_sel_index", 1);         t1->SetBranchAddress("BToKstll_sel_index", &BToKstll_sel_index);
+  //t1->SetBranchStatus("BToKstll_llsel_index", 1);       t1->SetBranchAddress("BToKstll_llsel_index", &BToKstll_llsel_index);
   t1->SetBranchStatus("BToKstll_order_index", 1);       t1->SetBranchAddress("BToKstll_order_index", &BToKstll_order_index);
 
   t1->SetBranchStatus("Muon_tag_index", 1);             t1->SetBranchAddress("Muon_tag_index", &Muon_tag_index);
   t1->SetBranchStatus("Muon_sel_index", 1);             t1->SetBranchAddress("Muon_sel_index", &Muon_sel_index);
   
   t1->SetBranchStatus("BToKstll_lep2_isPFLep", 1);      t1->SetBranchAddress("BToKstll_lep2_isPFLep", &BToKstll_lep2_isPFLep);  
-  t1->SetBranchStatus("BToKstll_isLowPtEle", 1);        t1->SetBranchAddress("BToKstll_isLowPtEle", &BToKstll_isLowPtEle);  
+  
+  t1->SetBranchStatus("BToKstll_isLowPtEle", 1);      t1->SetBranchAddress("BToKstll_isLowPtEle", &BToKstll_isLowPtEle);  
   
   t1->SetBranchStatus("BToKstll_lep1_seedBDT_unbiased", 1);   t1->SetBranchAddress("BToKstll_lep1_seedBDT_unbiased", &BToKstll_lep1_seedBDT_unbiased);
   t1->SetBranchStatus("BToKstll_lep1_seedBDT_ptbiased", 1);   t1->SetBranchAddress("BToKstll_lep1_seedBDT_ptbiased", &BToKstll_lep1_seedBDT_ptbiased);
@@ -463,6 +468,7 @@ int main(int argc, char **argv){
     t1->SetBranchStatus("Electron_phi", 1);             t1->SetBranchAddress("Electron_phi", &Lepton_phi);
     t1->SetBranchStatus("Electron_dxy", 1);             t1->SetBranchAddress("Electron_dxy", &Lepton_dxy);
     t1->SetBranchStatus("Electron_dz", 1);              t1->SetBranchAddress("Electron_dz", &Lepton_dz);
+
   }
   else{    
       
@@ -625,46 +631,41 @@ int main(int argc, char **argv){
     
     int muon_tag_index_event = -1;
     int triplet_sel_index = -1;
-    bool isllt = false;         
-    bool goodTripletFound = false;
+    bool isllt = false;
 
-    //choose the best vtxCL candidate provided it survives the selections
-    //priority is given to the llt triplets in case of LTT
-    for(int iL=0; iL<2; ++iL){
-      if(goodTripletFound) break;
+    std::vector<std::pair<int, int>> posRank;
+    for(unsigned int iPos = 0; iPos<BToKstll_order_index->size(); ++iPos)posRank.push_back(std::pair<int, int>(iPos, BToKstll_order_index->at(iPos)));
+    std::sort(posRank.begin(), posRank.end(),[](const std::pair<int, float>& i, const std::pair<int, float>& j) {return i.second < j.second; });     
 
-      for(unsigned int iP = 0; iP < BToKstll_order_index->size(); ++iP){	
-	
-	triplet_sel_index = BToKstll_order_index->at(iP);
-	muon_tag_index_event = Muon_tag_index->at(triplet_sel_index);
-	
-	if(iL == 0 && BToKstll_lep2_isPFLep[triplet_sel_index] != 1) continue;
-	else if(iL == 1 && BToKstll_lep2_isPFLep[triplet_sel_index] == 1) continue;
-	
-	if(muon_tag_index_event == -1 || triplet_sel_index == -1) continue;
-	if(dataset == "MC" && Muon_probe_index == -1) continue;
-	if(dataset == "MC" && triplet_sel_index != BToKstll_gen_index) continue;
-	
-	//analysis
-	if(BToKstll_lep1_charge[triplet_sel_index]*BToKstll_lep2_charge[triplet_sel_index] > 0.) continue;
-	
-	//to synch. with Riccardo ~ tight selection                                                           
-	if(typeSelection == "tightCB"){
-	  if((BToKstll_kaon_pt[triplet_sel_index] < 1.5 || BToKstll_B_pt[triplet_sel_index] < 10.)) continue;
-	  if(BToKstll_B_cosAlpha[triplet_sel_index] < 0.999) continue;
-	  if(BToKstll_B_CL_vtx[triplet_sel_index] < 0.1) continue;
-	  if(BToKstll_B_Lxy[triplet_sel_index] < 6.) continue;
-	}
 
-	isllt = (iL == 1) ? false : true;
-	goodTripletFound = true;
-	break;
-      }
+    for(auto rank:posRank){
+        if(BToKstll_lep1_pt[rank.first]>lep1_pT_cut && BToKstll_lep2_pt[rank.first]>lep2_pT_cut){
+                
+            if(!BToKstll_isLowPtEle && triplet_sel_index==-1 && Muon_tag_index->at(rank.first) !=-1){
+                triplet_sel_index = rank.first;
+                muon_tag_index_event = Muon_tag_index->at(rank.first);
+            }
+        
+            //if there is at least one llt triplet with tag muon, we pick it (whatever its rank is in case of LTT sample)
+            if(!BToKstll_isLowPtEle && BToKstll_lep2_isPFLep[rank.first]== 1 && Muon_tag_index->at(rank.first) !=-1){
+                triplet_sel_index = rank.first;
+                muon_tag_index_event = Muon_tag_index->at(rank.first);                
+                isllt = true;
+                break;
+            }
+              
+            //For low pt gsfTracks, only consider triplets if subleading lepton had BDT_seed_unbiased > 4
+            if(BToKstll_isLowPtEle && BToKstll_lep2_seedBDT_unbiased[rank.first]>lep2_seedBDT_unbiased && Muon_tag_index->at(rank.first) !=-1){
+                triplet_sel_index = rank.first;
+                muon_tag_index_event = Muon_tag_index->at(rank.first);
+                isllt = true;
+                break;
+            }                
+                
+        }
     }
-
-    if(!goodTripletFound) continue;
-  
-    /*         
+    
+     
     if(muon_tag_index_event == -1) continue;
     if(dataset == "MC" && Muon_probe_index == -1) continue;
     ++nEv_muonTag[0];
@@ -672,8 +673,6 @@ int main(int argc, char **argv){
     if(triplet_sel_index == -1)continue;
     if(dataset == "MC" && triplet_sel_index != BToKstll_gen_index) continue;
     ++nEv_recoCand[0];
-
-
     
     //opposite sign leptons
     //expect eff 1 because opposite charge is already required at nanoAOD level
@@ -687,8 +686,6 @@ int main(int argc, char **argv){
       if(BToKstll_B_CL_vtx[triplet_sel_index] < 0.1) continue;
       if(BToKstll_B_Lxy[triplet_sel_index] < 6.) continue;
     }
-    */
-
 
     //MVA selection to get same background rejection as with the cut base
     //if(typeSelection == "NN_BkgR" && nnBMX < 0.993) continue;
@@ -859,5 +856,4 @@ int main(int argc, char **argv){
   }
   outMassHistos.Close();
 
-}  
- 
+} 
