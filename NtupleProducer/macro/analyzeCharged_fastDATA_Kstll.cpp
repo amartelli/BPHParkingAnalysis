@@ -333,14 +333,20 @@ int main(int argc, char **argv){
     
   int BToKstll_sel_index = -1;
   int BToKstll_llsel_index = -1;
+  std::vector<int>* BToKstll_order_index = 0;
   
   std::vector<int>* Muon_tag_index = 0;
   int Muon_sel_index = -1;
-  
   int Muon_probe_index = -1;
   
   int BToKstll_lep2_isPFLep[kBToKstllMax];
+  int BToKstll_isLowPtEle[kBToKstllMax];
   
+  float BToKstll_lep1_seedBDT_unbiased[kBToKstllMax];
+  float BToKstll_lep1_seedBDT_ptbiased[kBToKstllMax];
+  float BToKstll_lep2_seedBDT_unbiased[kBToKstllMax];
+  float BToKstll_lep2_seedBDT_ptbiased[kBToKstllMax];
+
   float BToKstll_B_pt[kBToKstllMax];
   float BToKstll_B_mass[kBToKstllMax];
   float BToKstll_B_cosAlpha[kBToKstllMax];
@@ -395,12 +401,19 @@ int main(int argc, char **argv){
   
   t1->SetBranchStatus("BToKstll_sel_index", 1);         t1->SetBranchAddress("BToKstll_sel_index", &BToKstll_sel_index);
   t1->SetBranchStatus("BToKstll_llsel_index", 1);       t1->SetBranchAddress("BToKstll_llsel_index", &BToKstll_llsel_index);
-  
+  t1->SetBranchStatus("BToKstll_order_index", 1);       t1->SetBranchAddress("BToKstll_order_index", &BToKstll_order_index);
+
   t1->SetBranchStatus("Muon_tag_index", 1);             t1->SetBranchAddress("Muon_tag_index", &Muon_tag_index);
   t1->SetBranchStatus("Muon_sel_index", 1);             t1->SetBranchAddress("Muon_sel_index", &Muon_sel_index);
   
   t1->SetBranchStatus("BToKstll_lep2_isPFLep", 1);      t1->SetBranchAddress("BToKstll_lep2_isPFLep", &BToKstll_lep2_isPFLep);  
+  t1->SetBranchStatus("BToKstll_isLowPtEle", 1);        t1->SetBranchAddress("BToKstll_isLowPtEle", &BToKstll_isLowPtEle);  
   
+  t1->SetBranchStatus("BToKstll_lep1_seedBDT_unbiased", 1);   t1->SetBranchAddress("BToKstll_lep1_seedBDT_unbiased", &BToKstll_lep1_seedBDT_unbiased);
+  t1->SetBranchStatus("BToKstll_lep1_seedBDT_ptbiased", 1);   t1->SetBranchAddress("BToKstll_lep1_seedBDT_ptbiased", &BToKstll_lep1_seedBDT_ptbiased);
+  t1->SetBranchStatus("BToKstll_lep2_seedBDT_unbiased", 1);   t1->SetBranchAddress("BToKstll_lep2_seedBDT_unbiased", &BToKstll_lep2_seedBDT_unbiased);
+  t1->SetBranchStatus("BToKstll_lep2_seedBDT_ptbiased", 1);   t1->SetBranchAddress("BToKstll_lep2_seedBDT_ptbiased", &BToKstll_lep2_seedBDT_ptbiased);
+
   t1->SetBranchStatus("BToKstll_B_pt", 1);              t1->SetBranchAddress("BToKstll_B_pt", &BToKstll_B_pt);
   t1->SetBranchStatus("BToKstll_B_mass", 1);            t1->SetBranchAddress("BToKstll_B_mass", &BToKstll_B_mass);
   t1->SetBranchStatus("BToKstll_B_cosAlpha", 1);        t1->SetBranchAddress("BToKstll_B_cosAlpha", &BToKstll_B_cosAlpha);
@@ -613,19 +626,45 @@ int main(int argc, char **argv){
     int muon_tag_index_event = -1;
     int triplet_sel_index = -1;
     bool isllt = false;         
+    bool goodTripletFound = false;
 
-    //if there is at least one llt triplet with tag muon, we pick it (whatever its rank is if LTT ntuples are analyzed)
-    if(BToKstll_llsel_index != -1){
-        triplet_sel_index = BToKstll_llsel_index;
-        muon_tag_index_event = Muon_tag_index->at(BToKstll_llsel_index);
-	isllt = true;
-    } 
-    else{ 
-        triplet_sel_index = BToKstll_sel_index;
-        muon_tag_index_event = Muon_sel_index;
+    //choose the best vtxCL candidate provided it survives the selections
+    //priority is given to the llt triplets in case of LTT
+    for(int iL=0; iL<2; ++iL){
+      if(goodTripletFound) break;
+
+      for(unsigned int iP = 0; iP < BToKstll_order_index->size(); ++iP){	
+	
+	triplet_sel_index = BToKstll_order_index->at(iP);
+	muon_tag_index_event = Muon_tag_index->at(triplet_sel_index);
+	
+	if(iL == 0 && BToKstll_lep2_isPFLep[triplet_sel_index] != 1) continue;
+	else if(iL == 1 && BToKstll_lep2_isPFLep[triplet_sel_index] == 1) continue;
+	
+	if(muon_tag_index_event == -1 || triplet_sel_index == -1) continue;
+	if(dataset == "MC" && Muon_probe_index == -1) continue;
+	if(dataset == "MC" && triplet_sel_index != BToKstll_gen_index) continue;
+	
+	//analysis
+	if(BToKstll_lep1_charge[triplet_sel_index]*BToKstll_lep2_charge[triplet_sel_index] > 0.) continue;
+	
+	//to synch. with Riccardo ~ tight selection                                                           
+	if(typeSelection == "tightCB"){
+	  if((BToKstll_kaon_pt[triplet_sel_index] < 1.5 || BToKstll_B_pt[triplet_sel_index] < 10.)) continue;
+	  if(BToKstll_B_cosAlpha[triplet_sel_index] < 0.999) continue;
+	  if(BToKstll_B_CL_vtx[triplet_sel_index] < 0.1) continue;
+	  if(BToKstll_B_Lxy[triplet_sel_index] < 6.) continue;
+	}
+
+	isllt = (iL == 1) ? false : true;
+	goodTripletFound = true;
+	break;
+      }
     }
-            
-            
+
+    if(!goodTripletFound) continue;
+  
+    /*         
     if(muon_tag_index_event == -1) continue;
     if(dataset == "MC" && Muon_probe_index == -1) continue;
     ++nEv_muonTag[0];
@@ -648,6 +687,8 @@ int main(int argc, char **argv){
       if(BToKstll_B_CL_vtx[triplet_sel_index] < 0.1) continue;
       if(BToKstll_B_Lxy[triplet_sel_index] < 6.) continue;
     }
+    */
+
 
     //MVA selection to get same background rejection as with the cut base
     //if(typeSelection == "NN_BkgR" && nnBMX < 0.993) continue;
