@@ -6,6 +6,10 @@
     <use name="root" />
 </bin>
 
+<bin name="BToKstllNtupleProducerTrgMuon" file="BToKstllNtupleProducerTrgMuon.cc">
+    <use name="root" />
+</bin>
+
 <bin name="BToKmumuNtupleProducer" file="BToKmumuNtupleProducer.cc">
     <use name="root" />
 </bin>

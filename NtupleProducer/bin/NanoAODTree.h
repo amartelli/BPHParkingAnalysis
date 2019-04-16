@@ -72,7 +72,7 @@ public :
    float BToKstll_kaon_pt[kBToKstllMax];
    float BToKstll_kaon_eta[kBToKstllMax];
    float BToKstll_kaon_phi[kBToKstllMax];
-
+   int BToKstll_muTrg_index[kBToKstllMax];
 
 
    uint nElectron;
@@ -313,6 +313,7 @@ void NanoAODTree::Init(TChain* tree)
     _tree->SetBranchAddress("BToKstll_kaon_pt",&BToKstll_kaon_pt);
     _tree->SetBranchAddress("BToKstll_kaon_eta",&BToKstll_kaon_eta);
     _tree->SetBranchAddress("BToKstll_kaon_phi",&BToKstll_kaon_phi);
+    _tree->SetBranchAddress("BToKstll_muTrg_index",&BToKstll_muTrg_index);
   }
 
 
