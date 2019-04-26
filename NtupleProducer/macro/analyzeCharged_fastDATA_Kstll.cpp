@@ -518,6 +518,7 @@ int main(int argc, char **argv){
   TH2F* BDTele1_vs_pTele1[7];
   TH2F* BDTele2_vs_pTele2[7];
   TH2F* BDTele2_vs_BDTele1[7];
+  TH2F* pTele2_vs_pTele1[7];
 
   for(int ij=0; ij<7; ++ij){
     hAlpha[ij] = new TH1F(Form("hAlpha_%d", ij), "", 500, 0, 1.1);
@@ -612,20 +613,25 @@ int main(int argc, char **argv){
     hBpt[ij]->SetLineColor(kRed);
     hBpt[ij]->SetLineWidth(2);
     
-    BDTele1_vs_pTele1[ij] = new TH2F(Form("BDTele1_vs_pTele1_%d", ij), "", 500, 0., 30., 250, 0., 15.);
+    BDTele1_vs_pTele1[ij] = new TH2F(Form("BDTele1_vs_pTele1_%d", ij), "", 300, 0., 30., 60, 0., 15.);
     BDTele1_vs_pTele1[ij]->Sumw2();
     BDTele1_vs_pTele1[ij]->SetMarkerColor(kRed);
     BDTele1_vs_pTele1[ij]->SetMarkerStyle(20);    
     
-    BDTele2_vs_pTele2[ij] = new TH2F(Form("BDTele2_vs_pTele2_%d", ij), "", 500, 0., 30., 250, 0., 15.);
+    BDTele2_vs_pTele2[ij] = new TH2F(Form("BDTele2_vs_pTele2_%d", ij), "", 300, 0., 30., 60, 0., 15.);
     BDTele2_vs_pTele2[ij]->Sumw2();
     BDTele2_vs_pTele2[ij]->SetMarkerColor(kRed);
     BDTele2_vs_pTele2[ij]->SetMarkerStyle(20);
     
-    BDTele2_vs_BDTele1[ij] = new TH2F(Form("BDTele2_vs_BDTele1_%d", ij), "", 250, 0., 15., 250, 0., 15.);
+    BDTele2_vs_BDTele1[ij] = new TH2F(Form("BDTele2_vs_BDTele1_%d", ij), "", 60, 0., 15., 60, 0., 15.);
     BDTele2_vs_BDTele1[ij]->Sumw2();
     BDTele2_vs_BDTele1[ij]->SetMarkerColor(kRed);
     BDTele2_vs_BDTele1[ij]->SetMarkerStyle(20);
+	  
+    pTele2_vs_pTele1[ij] = new TH2F(Form("pTele2_vs_pTele1_%d", ij), "", 300, 0., 30., 300, 0., 30.);
+    pTele2_vs_pTele1[ij]->Sumw2();
+    pTele2_vs_pTele1[ij]->SetMarkerColor(kRed);
+    pTele2_vs_pTele1[ij]->SetMarkerStyle(20);
   }
 
 
@@ -807,6 +813,7 @@ int main(int argc, char **argv){
       BDTele1_vs_pTele1[massBin]->Fill(BToKstll_lep1_pt[triplet_sel_index], BToKstll_lep1_seedBDT_unbiased[triplet_sel_index]);
       BDTele2_vs_pTele2[massBin]->Fill(BToKstll_lep2_pt[triplet_sel_index], BToKstll_lep2_seedBDT_unbiased[triplet_sel_index]);
       BDTele2_vs_BDTele1[massBin]->Fill(BToKstll_lep1_seedBDT_unbiased[triplet_sel_index], BToKstll_lep2_seedBDT_unbiased[triplet_sel_index]);
+      pTele2_vs_pTele1[massBin]->Fill(BToKstll_lep1_pt[triplet_sel_index], BToKstll_lep2_pt[triplet_sel_index]);
     }
     
     //histograms inclusive over all m(ll)
@@ -834,7 +841,8 @@ int main(int argc, char **argv){
     BDTele1_vs_pTele1[6]->Fill(BToKstll_lep1_pt[triplet_sel_index], BToKstll_lep1_seedBDT_unbiased[triplet_sel_index]);
     BDTele2_vs_pTele2[6]->Fill(BToKstll_lep2_pt[triplet_sel_index], BToKstll_lep2_seedBDT_unbiased[triplet_sel_index]);
     BDTele2_vs_BDTele1[6]->Fill(BToKstll_lep1_seedBDT_unbiased[triplet_sel_index], BToKstll_lep2_seedBDT_unbiased[triplet_sel_index]);
-
+    pTele2_vs_pTele1[6]->Fill(BToKstll_lep1_pt[triplet_sel_index], BToKstll_lep2_pt[triplet_sel_index]);
+  
     /*
     if(massBin == 3 && BToKstll_B_mass[triplet_sel_index] < 6.)
       std::cout << run << " " << lumi << " " << event << std::endl;
@@ -877,6 +885,7 @@ int main(int argc, char **argv){
     BDTele1_vs_pTele1[ij]->Write(BDTele1_vs_pTele1[ij]->GetName());
     BDTele2_vs_pTele2[ij]->Write(BDTele2_vs_pTele2[ij]->GetName());
     BDTele2_vs_BDTele1[ij]->Write(BDTele2_vs_BDTele1[ij]->GetName());
+    pTele2_vs_pTele1[ij]->Write(pTele2_vs_pTele1[ij]->GetName());
 
     if(ij > 5) continue;
     std::cout << "\n massBin: " << llMassBoundary[ij] << " - " << llMassBoundary[ij+1]
